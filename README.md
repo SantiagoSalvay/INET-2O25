@@ -1,4 +1,4 @@
-# 🏆 Sistema de Carrito de Compras - Olimpíada Nacional de Programación 2025
+![image](https://github.com/user-attachments/assets/c90af70d-ac5b-4840-98e8-05c6bd7fa631)# 🏆 Sistema de Carrito de Compras - Olimpíada Nacional de Programación 2025
 
 Sistema completo de e-commerce para paquetes turísticos desarrollado para la Olimpíada Nacional de ETP 2025.
 
@@ -133,9 +133,20 @@ Sistema completo de e-commerce para paquetes turísticos desarrollado para la Ol
 ## 🖼️ Capturas de Pantalla
 
 - Página de inicio responsive
+![image](https://github.com/user-attachments/assets/f0763699-280a-437b-9ea7-1926f8e7b2d8)
+![image](https://github.com/user-attachments/assets/3a3115c5-228b-4067-9994-7165c355fd80)
 - Formularios de registro/login
-- Dashboard de cliente y panel administrativo
+![image](https://github.com/user-attachments/assets/3f84cbb0-f6fa-478a-ab06-3af985f93bbd)
+![image](https://github.com/user-attachments/assets/06812c6f-fd03-4a00-a5ab-5396d099fd99)
+- Dashboard panel administrativo
+![image](https://github.com/user-attachments/assets/aaeabbed-508b-41ba-8047-dc7cdc08ad6a)
+![image](https://github.com/user-attachments/assets/91ae977f-7ee7-4ac9-bdaf-1234cbd854f4)
+![image](https://github.com/user-attachments/assets/5ce5dadb-8d0f-436e-b56f-61d06b0eaa13)
+![image](https://github.com/user-attachments/assets/ee399e65-a3fc-4aa8-a627-f4262d03c29c)
+- Dasboard de panel del cliene
+![image](https://github.com/user-attachments/assets/8689ad75-79a7-4a00-a129-a342e13807e5)
 - Manual de usuario integrado
+![image](https://github.com/user-attachments/assets/ae95fbad-ac38-4e16-80e7-0e1a5df9cff5)
 
 ---
 
