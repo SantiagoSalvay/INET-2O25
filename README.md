@@ -2,114 +2,158 @@
 
 Sistema completo de e-commerce para paquetes turísticos desarrollado para la Olimpíada Nacional de ETP 2025.
 
-## 🚀 Características
+---
 
-- ✅ **Carrito de compras** completo con gestión de productos
-- ✅ **Autenticación segura** con JWT y bcrypt
-- ✅ **Panel administrativo** para jefe de ventas
-- ✅ **Almacenamiento en archivos JSON** (sin base de datos)
-- ✅ **Envío de emails** automático
-- ✅ **Responsive design** con Tailwind CSS
-- ✅ **Manual de usuario** integrado
+## 🚀 Características Principales
 
-## 🛠️ Tecnologías
+- **Carrito de compras** completo con gestión de productos y pedidos
+- **Autenticación segura** con JWT y bcrypt
+- **Panel administrativo** para gestión de empleados, productos y pedidos
+- **Persistencia en base de datos MySQL** (Railway) usando Prisma ORM
+- **Migración automática de datos** desde archivos JSON a la base de datos
+- **Envío de emails** automático (configurable)
+- **Responsive design** con Tailwind CSS
+- **Manual de usuario** integrado
 
-- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes
-- **Almacenamiento:** Archivos JSON locales
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend:** Next.js API Routes, Prisma ORM
+- **Base de datos:** MySQL (Railway)
+- **ORM:** Prisma Client
 - **Autenticación:** JWT + bcrypt
-- **UI:** shadcn/ui components
+- **Despliegue:** Railway, Vercel
 
-## 🔧 Configuración Local
+---
+
+## 📦 Estructura del Proyecto
+
+- `/app` - Rutas y páginas de Next.js (cliente y admin)
+- `/lib` - Lógica de acceso a datos (ahora usando Prisma)
+- `/prisma` - Esquema de base de datos y migraciones
+- `/data` - Archivos JSON originales para migración de datos
+- `/scripts` - Scripts utilitarios (ej: migración de datos)
+- `/public` - Recursos estáticos
+
+---
+
+## ⚡ Instalación y Puesta en Marcha
 
 1. **Clonar el repositorio**
-\`\`\`bash
-git clone <tu-repositorio>
-cd olimpiada-turismo-2025
-\`\`\`
+   ```bash
+   git clone <tu-repositorio>
+   cd INET-2O25
+   ```
 
 2. **Instalar dependencias**
-\`\`\`bash
-npm install
-\`\`\`
+   ```bash
+   npm install
+   # o
+   pnpm install
+   ```
 
 3. **Configurar variables de entorno**
-\`\`\`bash
-cp .env.example .env.local
-# Editar .env.local con tu JWT_SECRET
-\`\`\`
+   - Crea un archivo `.env` en la raíz con el siguiente contenido:
+     ```
+     DATABASE_URL="mysql://<usuario>:<password>@<host>:<puerto>/<db>"
+     JWT_SECRET=inet_2025_super_secret_key_123456789
+     ```
+   - (Reemplaza los valores según tu instancia Railway/MySQL)
 
-4. **Ejecutar en desarrollo**
-\`\`\`bash
-npm run dev
-\`\`\`
+4. **Generar el cliente Prisma y aplicar el esquema**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
 
-## 🚀 Deploy
+5. **Migrar los datos iniciales desde JSON a la base de datos**
+   ```bash
+   node scripts/migrate-data.js
+   ```
 
-### Variables de Entorno Requeridas:
+6. **Ejecutar en desarrollo**
+   ```bash
+   npm run dev
+   # o
+   pnpm dev
+   ```
 
-\`\`\`bash
-JWT_SECRET=olimpiada_turismo_2025_jwt_secret_key_muy_segura
-NEXTAUTH_SECRET=olimpiada_turismo_2025_nextauth_secret
-NEXTAUTH_URL=https://tu-app.vercel.app
-\`\`\`
+---
 
-### Pasos para Deploy:
+## 📚 Dependencias Principales
 
-1. **Conectar repositorio a Vercel/Railway**
-2. **Configurar variables de entorno**
-3. **Deploy automático**
+- `next`, `react`, `typescript`
+- `prisma`, `@prisma/client`
+- `mysql2`
+- `bcryptjs`, `jsonwebtoken`
+- `tailwindcss`, `shadcn/ui`
+- `ts-node`, `@types/node`
+
+---
+
+## 🗄️ Migración y Persistencia de Datos
+
+- Todos los datos de productos, pedidos y usuarios se almacenan en MySQL.
+- El script `scripts/migrate-data.js` permite importar datos desde archivos JSON originales.
+- El modelo de datos está definido en `prisma/schema.prisma` y sincronizado con la base de datos vía Prisma.
+
+---
 
 ## 👥 Credenciales de Prueba
 
-### Jefe de Ventas (Admin)
-- **Email:** admin@turismoweb.com
-- **Contraseña:** admin123
+**Jefe de Ventas (Admin)**
+- Email: `admin@turismoweb.com`
+- Contraseña: `admin123`
 
-### Cliente
-- **Email:** cliente@test.com
-- **Contraseña:** cliente123
+**Cliente**
+- Email: `cliente@test.com`
+- Contraseña: `cliente123`
 
-## 📊 Estructura de Datos
-
-- `data/usuarios.json` - Clientes y administradores
-- `data/productos.json` - Catálogo de paquetes turísticos
-- `data/pedidos.json` - Órdenes de compra
+---
 
 ## 🎯 Funcionalidades
 
 ### Para Clientes:
-- ✅ Registro y autenticación
-- ✅ Exploración de productos por categorías
-- ✅ Carrito de compras interactivo
-- ✅ Gestión de pedidos
-- ✅ Historial de compras
+- Registro y autenticación
+- Exploración de productos por categorías
+- Carrito de compras interactivo
+- Gestión y seguimiento de pedidos
+- Historial de compras
 
 ### Para Jefe de Ventas:
-- ✅ Dashboard con estadísticas
-- ✅ CRUD de productos
-- ✅ Gestión de pedidos
-- ✅ Reportes de ventas
-- ✅ Estado de cuenta
+- Dashboard con estadísticas
+- CRUD de productos y empleados
+- Gestión y actualización de pedidos
+- Reportes de ventas
 
-## 📱 Capturas de Pantalla
+---
 
-El sistema incluye:
-- Página de inicio responsive con carruseles
+## 🖼️ Capturas de Pantalla
+
+- Página de inicio responsive
 - Formularios de registro/login
-- Dashboard de cliente con carrito
-- Panel administrativo completo
+- Dashboard de cliente y panel administrativo
 - Manual de usuario integrado
+
+---
+
+## 🚀 Deploy
+
+1. **Conectar el repositorio a Railway y/o Vercel**
+2. **Configurar variables de entorno en el panel de deploy**
+3. **Deploy automático**
+
+---
 
 ## 📞 Soporte
 
-Para soporte técnico:
-- **Email:** soporte@turismoweb.com
-- **Teléfono:** +54 11 1234-5678
+- Email: soporte@turismoweb.com
+- Teléfono: +54 11 1234-5678
+
+---
 
 ## 📄 Licencia
 
 Desarrollado para la Olimpíada Nacional de Programación 2025 - INET
-\`\`\`
-
-Ahora voy a simplificar completamente el sistema de login para que funcione solo con archivos JSON:
