@@ -1,21 +1,34 @@
+export const dynamic = 'force-dynamic'
+
 import { type NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 import { getStats } from "@/lib/data-store"
 
 function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get("authorization")
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Token no proporcionado")
+  try {
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new Error("Token no proporcionado")
+    }
+
+    const token = authHeader.substring(7)
+
+    // Verificar si es un token simple o JWT
+    if (token === "admin-token-123") {
+      return { userId: 1, email: "admin@turismoweb.com", rol: "admin" }
+    }
+
+    const secret = process.env.JWT_SECRET
+    if (!secret) {
+      console.warn("JWT_SECRET no está definido en las variables de entorno")
+      throw new Error("Error de configuración del servidor")
+    }
+
+    return jwt.verify(token, secret) as any
+  } catch (error) {
+    console.error("Error verificando token:", error)
+    throw new Error("Token inválido")
   }
-
-  const token = authHeader.substring(7)
-
-  // Verificar si es un token simple o JWT
-  if (token === "admin-token-123") {
-    return { userId: 1, email: "admin@turismoweb.com", rol: "admin" }
-  }
-
-  return jwt.verify(token, process.env.JWT_SECRET || "fallback-secret-key") as any
 }
 
 export async function GET(request: NextRequest) {
@@ -45,14 +58,15 @@ export async function GET(request: NextRequest) {
 
     // Devolver estadísticas por defecto en caso de error
     const defaultStats = {
-      totalProductos: 10,
+      totalProductos: 0,
       pedidosPendientes: 0,
       ventasDelMes: 0,
-      totalClientes: 1,
+      totalClientes: 0,
+      error: error instanceof Error ? error.message : "Error desconocido"
     }
 
     return NextResponse.json(defaultStats, {
-      status: 200,
+      status: error instanceof Error && error.message === "Token inválido" ? 401 : 500,
       headers: { "Content-Type": "application/json" },
     })
   }

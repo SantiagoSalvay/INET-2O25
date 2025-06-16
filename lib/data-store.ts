@@ -2,6 +2,13 @@ import { promises as fs } from "fs"
 import path from "path"
 import { prisma } from "./prisma"
 
+// Definir tipos basados en el schema de Prisma
+type Usuario = any
+
+type Producto = any
+
+type Pedido = any
+
 // Rutas de los archivos JSON
 const DATA_DIR = path.join(process.cwd(), "data")
 const USERS_FILE = path.join(DATA_DIR, "usuarios.json")
@@ -217,7 +224,15 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function createUser(userData: Omit<Usuario, 'id' | 'createdAt' | 'updatedAt'>) {
-  return await prisma.usuario.create({ data: userData });
+  const now = new Date()
+  return await prisma.usuario.create({
+    data: {
+      ...userData,
+      fecha_ingreso: now,
+      createdAt: now,
+      updatedAt: now
+    }
+  })
 }
 
 // Funciones para productos
@@ -226,11 +241,25 @@ export async function getProducts() {
 }
 
 export async function createProduct(productData: Omit<Producto, "id" | "createdAt" | "updatedAt">) {
-  return await prisma.producto.create({ data: productData })
+  const now = new Date()
+  return await prisma.producto.create({
+    data: {
+      ...productData,
+      createdAt: now,
+      updatedAt: now
+    }
+  })
 }
 
 export async function updateProduct(id: number, productData: Partial<Omit<Producto, "id">>) {
-  return await prisma.producto.update({ where: { id }, data: productData })
+  const now = new Date()
+  return await prisma.producto.update({
+    where: { id },
+    data: {
+      ...productData,
+      updatedAt: now
+    }
+  })
 }
 
 export async function getProductByCode(codigo: string) {
@@ -251,50 +280,57 @@ export async function getOrdersByUser(userId: number) {
 }
 
 export async function createOrder(orderData: Omit<Pedido, 'id' | 'numero_pedido' | 'createdAt' | 'updatedAt'> & { detalles?: any }) {
+  const now = new Date()
   return await prisma.pedido.create({
     data: {
       ...orderData,
-      numero_pedido: `PED-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-      fecha_pedido: new Date(),
+      numero_pedido: `PED-${now.getTime()}-${Math.floor(Math.random() * 10000)}`,
+      fecha_pedido: now,
       detalles: orderData.detalles || {},
+      createdAt: now,
+      updatedAt: now
     },
-  });
+  })
 }
 
 export async function updateOrderStatus(id: number, estado: string) {
-  await prisma.pedido.update({ where: { id }, data: { estado } });
+  const now = new Date()
+  await prisma.pedido.update({
+    where: { id },
+    data: {
+      estado,
+      updatedAt: now
+    }
+  })
 }
 
 // Función para obtener estadísticas
 export async function getStats() {
   try {
-    const products = await readJsonFile(PRODUCTS_FILE, initialProducts)
-    const orders = await getOrders()
-    const users = await getUsers()
+    const [products, orders, users] = await Promise.all([
+      prisma.producto.findMany({ where: { activo: true } }),
+      prisma.pedido.findMany(),
+      prisma.usuario.findMany({ where: { rol: 'cliente', activo: true } })
+    ]);
 
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
 
     const ventasDelMes = orders
-      .filter((o) => {
+      .filter((o: any) => {
         const orderDate = new Date(o.fecha_pedido)
         return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear
       })
-      .reduce((sum, o) => sum + o.total, 0)
+      .reduce((sum: number, o: any) => sum + o.total, 0)
 
     return {
-      totalProductos: products.filter((p) => p.activo).length,
-      pedidosPendientes: orders.filter((o) => o.estado === "pendiente").length,
+      totalProductos: products.length,
+      pedidosPendientes: orders.filter((o: any) => o.estado === "pendiente").length,
       ventasDelMes,
-      totalClientes: users.filter((u) => u.rol === "cliente" && u.activo).length,
+      totalClientes: users.length,
     }
   } catch (error) {
     console.error("Error getting stats:", error)
-    return {
-      totalProductos: 10,
-      pedidosPendientes: 0,
-      ventasDelMes: 0,
-      totalClientes: 1,
-    }
+    throw error
   }
 }
