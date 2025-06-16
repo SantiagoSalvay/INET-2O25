@@ -1,43 +1,12 @@
 import { promises as fs } from "fs"
 import path from "path"
-import { PrismaClient, Producto } from '../lib/generated/prisma'
+import { prisma } from "./prisma"
 
 // Rutas de los archivos JSON
 const DATA_DIR = path.join(process.cwd(), "data")
 const USERS_FILE = path.join(DATA_DIR, "usuarios.json")
 const PRODUCTS_FILE = path.join(DATA_DIR, "productos.json")
 const ORDERS_FILE = path.join(DATA_DIR, "pedidos.json")
-
-// Interfaces
-interface Usuario {
-  id: number
-  nombre: string
-  apellido: string
-  email: string
-  telefono?: string
-  password: string
-  rol: "cliente" | "admin" | "empleado"
-  fecha_registro: string
-  activo: boolean
-  departamento: string
-}
-
-interface Pedido {
-  id: number
-  numero_pedido: string
-  usuario_id: number
-  fecha_pedido: string
-  estado: "pendiente" | "entregado" | "cancelado"
-  total: number
-  items: Array<{
-    producto_id: number
-    producto_descripcion: string
-    cantidad: number
-    precio_unitario: number
-  }>
-  cliente_nombre?: string
-  cliente_email?: string
-}
 
 // Función para logging seguro
 function safeLog(message: string, data?: any) {
@@ -216,9 +185,11 @@ export const initialUsers: Usuario[] = [
     telefono: "+54 11 1234-5678",
     password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // admin123
     rol: "admin",
-    fecha_registro: new Date().toISOString(),
+    fecha_ingreso: new Date().toISOString(),
     activo: true,
     departamento: "Sin departamento",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: 2,
@@ -228,13 +199,13 @@ export const initialUsers: Usuario[] = [
     telefono: "+54 11 9876-5432",
     password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // cliente123
     rol: "cliente",
-    fecha_registro: new Date().toISOString(),
+    fecha_ingreso: new Date().toISOString(),
     activo: true,
     departamento: "Sin departamento",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
-
-const prisma = new PrismaClient()
 
 // Funciones para usuarios
 export async function getUsers() {
@@ -245,7 +216,7 @@ export async function getUserByEmail(email: string) {
   return await prisma.usuario.findUnique({ where: { email } });
 }
 
-export async function createUser(userData: Omit<import('../lib/generated/prisma').Usuario, 'id' | 'createdAt' | 'updatedAt'>) {
+export async function createUser(userData: Omit<Usuario, 'id' | 'createdAt' | 'updatedAt'>) {
   return await prisma.usuario.create({ data: userData });
 }
 
@@ -279,7 +250,7 @@ export async function getOrdersByUser(userId: number) {
   return await prisma.pedido.findMany({ where: { usuarioId: userId } });
 }
 
-export async function createOrder(orderData: Omit<import('../lib/generated/prisma').Pedido, 'id' | 'numero_pedido' | 'createdAt' | 'updatedAt'> & { detalles?: any }) {
+export async function createOrder(orderData: Omit<Pedido, 'id' | 'numero_pedido' | 'createdAt' | 'updatedAt'> & { detalles?: any }) {
   return await prisma.pedido.create({
     data: {
       ...orderData,

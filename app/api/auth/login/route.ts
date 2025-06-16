@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@/lib/generated/prisma"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 // Función para crear respuesta JSON segura
@@ -43,8 +43,6 @@ async function verifyPassword(plainPassword: string, hashedPasswordFromDb: strin
     return false
   }
 }
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {

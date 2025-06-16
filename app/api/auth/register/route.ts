@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@/lib/generated/prisma"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
 
 // Función para crear respuesta JSON segura
@@ -40,8 +40,6 @@ function simpleHash(password: string): string {
   return `simple_hash_${Math.abs(hash)}_${password.length}`
 }
 */
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
