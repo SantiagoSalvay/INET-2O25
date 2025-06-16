@@ -214,7 +214,7 @@ export const initialUsers: Usuario[] = [
     apellido: "Sistema",
     email: "admin@turismoweb.com",
     telefono: "+54 11 1234-5678",
-    password: "$2a$12$LQv3c1yqBwEHFl5ePEjNNONciJ0MGhppMn5h1o3t7EFeCLww/Hjji", // admin123
+    password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // admin123
     rol: "admin",
     fecha_registro: new Date().toISOString(),
     activo: true,
@@ -226,7 +226,7 @@ export const initialUsers: Usuario[] = [
     apellido: "Prueba",
     email: "cliente@test.com",
     telefono: "+54 11 9876-5432",
-    password: "$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // cliente123
+    password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // cliente123
     rol: "cliente",
     fecha_registro: new Date().toISOString(),
     activo: true,

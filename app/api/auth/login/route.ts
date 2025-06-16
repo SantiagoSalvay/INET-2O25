@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@/lib/generated/prisma"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 // Función para crear respuesta JSON segura
 function createJsonResponse(data: any, status = 200) {
@@ -31,7 +31,17 @@ function createJsonResponse(data: any, status = 200) {
 // Función para verificar contraseñas con bcrypt
 async function verifyPassword(plainPassword: string, hashedPasswordFromDb: string): Promise<boolean> {
   console.log("Verifying password with bcrypt...")
-  return await bcrypt.compare(plainPassword, hashedPasswordFromDb)
+  console.log("Plain password:", plainPassword)
+  console.log("Hashed password from DB:", hashedPasswordFromDb)
+  
+  try {
+    const result = await bcrypt.compare(plainPassword, hashedPasswordFromDb)
+    console.log("Password verification result:", result)
+    return result
+  } catch (error) {
+    console.error("Error verifying password:", error)
+    return false
+  }
 }
 
 const prisma = new PrismaClient()

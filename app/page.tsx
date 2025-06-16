@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock } from "lucide-react"
+import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock, Menu, X } from "lucide-react"
 
 // Datos de ejemplo para los carruseles
 const destinosPopulares = [
@@ -164,52 +164,66 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
   }
 
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000) // Auto-advance cada 5 segundos
+    const interval = setInterval(nextSlide, 5000)
     return () => clearInterval(interval)
   }, [maxIndex])
 
   return (
-    <div className="relative">
-      <div className="overflow-hidden">
+    <div className="relative group perspective-1000">
+      <div className="overflow-hidden rounded-2xl backdrop-blur-sm bg-white/5 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/10">
         <div
-          className="flex transition-transform duration-300 ease-in-out"
+          className="flex transition-all duration-700 ease-out"
           style={{
             transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
           }}
         >
           {children.map((child, index) => (
-            <div key={index} className={`flex-shrink-0 px-2`} style={{ width: `${100 / itemsPerView}%` }}>
+            <div 
+              key={index} 
+              className={`flex-shrink-0 px-2 transition-all duration-500 ${
+                index === currentIndex 
+                  ? 'scale-100 opacity-100 rotate-y-0' 
+                  : 'scale-95 opacity-70 rotate-y-10'
+              }`} 
+              style={{ width: `${100 / itemsPerView}%` }}
+            >
               {child}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Controles */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white shadow-lg hover:bg-gray-50"
-        onClick={prevSlide}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white shadow-lg hover:bg-gray-50"
-        onClick={nextSlide}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+      {/* Controles con efecto de aparición */}
+      <div className="absolute inset-y-0 left-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-md shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20 hover:bg-white/20 hover:scale-110 transition-all duration-300 -translate-x-6 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.57)]"
+          onClick={prevSlide}
+        >
+          <ChevronLeft className="h-6 w-6 text-white" />
+        </Button>
+      </div>
+      <div className="absolute inset-y-0 right-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-md shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20 hover:bg-white/20 hover:scale-110 transition-all duration-300 translate-x-6 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.57)]"
+          onClick={nextSlide}
+        >
+          <ChevronRight className="h-6 w-6 text-white" />
+        </Button>
+      </div>
 
-      {/* Indicadores */}
-      <div className="flex justify-center mt-4 space-x-2">
+      {/* Indicadores mejorados */}
+      <div className="flex justify-center mt-6 space-x-3">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-colors ${
-              index === currentIndex ? "bg-blue-600" : "bg-gray-300"
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex 
+                ? 'bg-blue-500 scale-125 shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                : 'bg-white/30 hover:bg-white/50'
             }`}
             onClick={() => setCurrentIndex(index)}
           />
@@ -220,31 +234,136 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
 }
 
 export default function HomePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const offset = 80 // Ajusta este valor según la altura de tu navbar
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+      setIsMenuOpen(false)
+    }
+  }
+
   useEffect(() => {
     document.title = "TurismoWeb";
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      {/* Navbar */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/20' 
+          : 'bg-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <MapPin className="h-8 w-8 text-blue-600 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900">TurismoWeb</h1>
-            </div>
-            <div className="flex space-x-4">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2">
+              <Plane className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">TravelEase</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <button 
+                onClick={() => scrollToSection('destinos')}
+                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Destinos
+              </button>
+              <button 
+                onClick={() => scrollToSection('paquetes')}
+                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Paquetes
+              </button>
+              <button 
+                onClick={() => scrollToSection('experiencias')}
+                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Experiencias
+              </button>
               <Link href="/login">
-                <Button variant="outline">Iniciar Sesión</Button>
+                <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                  Iniciar Sesión
+                </Button>
               </Link>
               <Link href="/register">
-                <Button>Registrarse</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+                  Registrarse
+                </Button>
               </Link>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-gray-600" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600" />
+              )}
+            </button>
           </div>
         </div>
-      </header>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200/20">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <button 
+                onClick={() => scrollToSection('destinos')}
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+              >
+                Destinos
+              </button>
+              <button 
+                onClick={() => scrollToSection('paquetes')}
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+              >
+                Paquetes
+              </button>
+              <button 
+                onClick={() => scrollToSection('experiencias')}
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+              >
+                Experiencias
+              </button>
+              <div className="px-3 py-2 space-y-2">
+                <Link href="/login" className="block w-full">
+                  <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                    Iniciar Sesión
+                  </Button>
+                </Link>
+                <Link href="/register" className="block w-full">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+                    Registrarse
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Hero Section */}
       <section className="py-20 relative overflow-hidden">
@@ -334,7 +453,7 @@ export default function HomePage() {
       </section>
 
       {/* Destinos Populares */}
-      <section className="py-16 bg-gray-50">
+      <section id="destinos" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Destinos Populares</h3>
@@ -345,28 +464,34 @@ export default function HomePage() {
             {destinosPopulares.map((destino) => (
               <Card
                 key={destino.id}
-                className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
               >
-                <div className="relative">
+                <div className="relative overflow-hidden rounded-t-lg">
                   <img
                     src={destino.imagen || "/placeholder.svg"}
                     alt={destino.nombre}
-                    className="w-full h-48 object-cover rounded-t-lg"
+                    className="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700"
                   />
-                  <Badge className="absolute top-3 left-3 bg-blue-600">{destino.categoria}</Badge>
-                  <div className="absolute top-3 right-3 bg-white/90 rounded-full px-2 py-1 flex items-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Badge className="absolute top-3 left-3 bg-blue-600/90 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">{destino.categoria}</Badge>
+                  <div className="absolute top-3 right-3 bg-white/10 backdrop-blur-md rounded-full px-2 py-1 flex items-center transform group-hover:scale-105 transition-transform duration-300 border border-white/20">
                     <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium ml-1">{destino.rating}</span>
+                    <span className="text-sm font-medium ml-1 text-white">{destino.rating}</span>
                   </div>
                 </div>
                 <CardHeader>
-                  <CardTitle className="text-xl">{destino.nombre}</CardTitle>
-                  <CardDescription>{destino.descripcion}</CardDescription>
+                  <CardTitle className="text-xl group-hover:text-blue-600 transition-colors duration-300">{destino.nombre}</CardTitle>
+                  <CardDescription className="text-gray-600">{destino.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-600">{destino.precio}</span>
-                    <Button size="sm">Ver más</Button>
+                    <span className="text-2xl font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">{destino.precio}</span>
+                    <Button 
+                      size="sm" 
+                      className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
+                    >
+                      Ver más
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -376,7 +501,7 @@ export default function HomePage() {
       </section>
 
       {/* Paquetes Destacados */}
-      <section className="py-16 bg-white">
+      <section id="paquetes" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Paquetes Destacados</h3>
@@ -385,27 +510,28 @@ export default function HomePage() {
 
           <Carousel itemsPerView={2}>
             {paquetesDestacados.map((paquete) => (
-              <Card key={paquete.id} className="hover:shadow-xl transition-all duration-300">
-                <div className="relative">
+              <Card key={paquete.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+                <div className="relative overflow-hidden rounded-t-lg">
                   <img
                     src={paquete.imagen || "/placeholder.svg"}
                     alt={paquete.titulo}
-                    className="w-full h-64 object-cover rounded-t-lg"
+                    className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute bottom-3 left-3 bg-white/90 rounded-lg px-3 py-1 flex items-center space-x-4">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-3 left-3 bg-white/10 backdrop-blur-md rounded-lg px-3 py-1 flex items-center space-x-4 transform group-hover:scale-105 transition-transform duration-300 border border-white/20">
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 text-gray-600 mr-1" />
-                      <span className="text-sm">{paquete.duracion}</span>
+                      <Calendar className="h-4 w-4 text-white mr-1" />
+                      <span className="text-sm text-white">{paquete.duracion}</span>
                     </div>
                     <div className="flex items-center">
-                      <Users className="h-4 w-4 text-gray-600 mr-1" />
-                      <span className="text-sm">{paquete.personas}</span>
+                      <Users className="h-4 w-4 text-white mr-1" />
+                      <span className="text-sm text-white">{paquete.personas}</span>
                     </div>
                   </div>
                 </div>
                 <CardHeader>
-                  <CardTitle className="text-xl">{paquete.titulo}</CardTitle>
-                  <CardDescription>{paquete.descripcion}</CardDescription>
+                  <CardTitle className="text-xl group-hover:text-blue-600 transition-colors duration-300">{paquete.titulo}</CardTitle>
+                  <CardDescription className="text-gray-600">{paquete.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -413,19 +539,21 @@ export default function HomePage() {
                       <h4 className="font-semibold text-sm text-gray-700 mb-2">Incluye:</h4>
                       <div className="grid grid-cols-2 gap-1">
                         {paquete.incluye.map((item, index) => (
-                          <div key={index} className="flex items-center text-sm text-gray-600">
-                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></div>
+                          <div key={index} className="flex items-center text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2 transform group-hover:scale-125 transition-transform duration-300 shadow-[0_0_8px_rgba(37,99,235,0.3)]"></div>
                             {item}
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="flex justify-between items-center pt-4 border-t">
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                       <div>
                         <span className="text-sm text-gray-500">Desde</span>
-                        <div className="text-2xl font-bold text-blue-600">${paquete.precio.toLocaleString()}</div>
+                        <div className="text-2xl font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">${paquete.precio.toLocaleString()}</div>
                       </div>
-                      <Button>Reservar ahora</Button>
+                      <Button className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]">
+                        Reservar ahora
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -436,7 +564,7 @@ export default function HomePage() {
       </section>
 
       {/* Experiencias Únicas */}
-      <section className="py-16 bg-gray-50">
+      <section id="experiencias" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Experiencias Únicas</h3>
@@ -445,39 +573,44 @@ export default function HomePage() {
 
           <Carousel itemsPerView={4}>
             {experienciasUnicas.map((experiencia) => (
-              <Card key={experiencia.id} className="hover:shadow-lg transition-all duration-300">
-                <div className="relative">
+              <Card key={experiencia.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+                <div className="relative overflow-hidden rounded-t-lg">
                   <img
                     src={experiencia.imagen || "/placeholder.svg"}
                     alt={experiencia.titulo}
-                    className="w-full h-40 object-cover rounded-t-lg"
+                    className="w-full h-40 object-cover transform group-hover:scale-110 transition-transform duration-700"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <Badge
-                    className={`absolute top-3 right-3 ${
+                    className={`absolute top-3 right-3 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300 border border-white/20 ${
                       experiencia.dificultad === "Fácil"
-                        ? "bg-green-500"
+                        ? "bg-green-500/90 shadow-[0_4px_16px_rgba(34,197,94,0.3)]"
                         : experiencia.dificultad === "Difícil"
-                          ? "bg-red-500"
-                          : "bg-yellow-500"
+                          ? "bg-red-500/90 shadow-[0_4px_16px_rgba(239,68,68,0.3)]"
+                          : "bg-yellow-500/90 shadow-[0_4px_16px_rgba(234,179,8,0.3)]"
                     }`}
                   >
                     {experiencia.dificultad}
                   </Badge>
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{experiencia.titulo}</CardTitle>
-                  <CardDescription className="text-sm">{experiencia.descripcion}</CardDescription>
+                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-300">{experiencia.titulo}</CardTitle>
+                  <CardDescription className="text-sm text-gray-600">{experiencia.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="h-4 w-4 mr-1" />
+                    <div className="flex items-center text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                      <Clock className="h-4 w-4 mr-1 transform group-hover:scale-110 transition-transform duration-300" />
                       {experiencia.duracion}
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-blue-600">${experiencia.precio.toLocaleString()}</span>
-                    <Button size="sm" variant="outline">
+                    <span className="text-lg font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">${experiencia.precio.toLocaleString()}</span>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform group-hover:scale-105 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
+                    >
                       Ver más
                     </Button>
                   </div>
@@ -489,15 +622,26 @@ export default function HomePage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h3 className="text-4xl font-extrabold text-white mb-6">¿Listo para tu próxima aventura?</h3>
-          <p className="text-xl text-blue-100 mb-8">
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 animate-pulse"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent animate-pulse"></div>
+        </div>
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative">
+          <h3 className="text-4xl font-extrabold text-white mb-6 transform hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+            ¿Listo para tu próxima aventura?
+          </h3>
+          <p className="text-xl text-blue-100 mb-8 leading-relaxed drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
             Únete a miles de viajeros que ya confían en nosotros para crear experiencias inolvidables
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="text-lg px-8 py-4 bg-white/90 backdrop-blur-md hover:bg-white transform hover:scale-105 transition-all duration-300 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.57)] border border-white/20"
+              >
                 Crear cuenta gratis
               </Button>
             </Link>
@@ -505,7 +649,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-lg px-8 py-4 text-white border-white hover:bg-white hover:text-blue-600"
+                className="text-lg px-8 py-4 text-white border-white/50 hover:border-white bg-transparent hover:bg-white/10 backdrop-blur-md transform hover:scale-105 transition-all duration-300 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.57)]"
               >
                 Explorar ahora
               </Button>

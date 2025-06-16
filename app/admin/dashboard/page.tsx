@@ -799,9 +799,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <Select value={filterCategoria} onValueChange={setFilterCategoria}>
-                      <SelectTrigger className="w-full md:w-48">
-                        <Filter className="h-4 w-4 mr-2" />
-                        <SelectValue placeholder="Filtrar por categoría" />
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Categoría" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todas las categorías</SelectItem>
@@ -1025,9 +1024,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <Select value={filterDepartamento} onValueChange={setFilterDepartamento}>
-                      <SelectTrigger className="w-full md:w-48">
-                        <Filter className="h-4 w-4 mr-2" />
-                        <SelectValue placeholder="Filtrar por departamento" />
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Departamento" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos los departamentos</SelectItem>
@@ -1226,11 +1224,11 @@ export default function AdminDashboard() {
                       <div className="space-y-2">
                         <Label>Departamento</Label>
                         <Select
-                          value={editingEmployee.departamento}
-                          onChange={(e) => setEditingEmployee({ ...editingEmployee, departamento: e.target.value })}
+                          value={editingEmployee?.departamento || ""}
+                          onValueChange={(value) => setEditingEmployee(editingEmployee ? { ...editingEmployee, departamento: value } : null)}
                         >
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Selecciona un departamento" />
                           </SelectTrigger>
                           <SelectContent>
                             {DEPARTAMENTOS.map((dept) => (
@@ -1281,9 +1279,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <Select value={filterEstado} onValueChange={setFilterEstado}>
-                      <SelectTrigger className="w-full md:w-48">
-                        <Filter className="h-4 w-4 mr-2" />
-                        <SelectValue placeholder="Filtrar por estado" />
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Estado" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos los estados</SelectItem>
@@ -1570,90 +1567,7 @@ export default function AdminDashboard() {
                         </div>
                       </CardContent>
                     </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Personal por Departamento</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {DEPARTAMENTOS.map((dept) => {
-                            const empleadosDept = empleados.filter((e) => e.departamento === dept.value && e.activo)
-                            const maxEmpleados = Math.max(
-                              ...DEPARTAMENTOS.map(
-                                (d) => empleados.filter((e) => e.departamento === d.value && e.activo).length,
-                              ),
-                            )
-                            const percentage = maxEmpleados > 0 ? (empleadosDept.length / maxEmpleados) * 100 : 0
-
-                            return (
-                              <div key={dept.value}>
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-sm font-medium">{dept.label}</span>
-                                  <span className="text-sm text-gray-600">{empleadosDept.length} empleados</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div
-                                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${percentage}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
                   </div>
-
-                  {/* Resumen de actividad reciente */}
-                  <Card className="mt-6">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Actividad Reciente</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                          <div className="flex items-center">
-                            <Package className="h-5 w-5 text-blue-600 mr-3" />
-                            <div>
-                              <p className="text-sm font-medium">Productos activos en catálogo</p>
-                              <p className="text-xs text-gray-600">Total de productos disponibles para venta</p>
-                            </div>
-                          </div>
-                          <span className="text-lg font-bold text-blue-600">
-                            {productos.filter((p) => p.activo).length}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                          <div className="flex items-center">
-                            <ShoppingCart className="h-5 w-5 text-yellow-600 mr-3" />
-                            <div>
-                              <p className="text-sm font-medium">Pedidos pendientes de procesamiento</p>
-                              <p className="text-xs text-gray-600">Requieren atención inmediata</p>
-                            </div>
-                          </div>
-                          <span className="text-lg font-bold text-yellow-600">
-                            {pedidos.filter((p) => p.estado === "pendiente").length}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                          <div className="flex items-center">
-                            <Users className="h-5 w-5 text-green-600 mr-3" />
-                            <div>
-                              <p className="text-sm font-medium">Empleados activos</p>
-                              <p className="text-xs text-gray-600">Personal trabajando actualmente</p>
-                            </div>
-                          </div>
-                          <span className="text-lg font-bold text-green-600">
-                            {empleados.filter((e) => e.activo).length}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
                 </CardContent>
               </Card>
             </div>

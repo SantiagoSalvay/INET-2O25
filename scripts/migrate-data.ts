@@ -2,7 +2,7 @@ import { PrismaClient } from '../lib/generated/prisma'
 import fs from 'fs'
 import path from 'path'
 import { initialUsers, initialProducts } from '../lib/data-store' // Importar datos iniciales
-import bcrypt from 'bcrypt' // Importar bcrypt
+import bcrypt from 'bcryptjs' // Importar bcryptjs en lugar de bcrypt
 
 const prisma = new PrismaClient()
 
