@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/c90af70d-ac5b-4840-98e8-05c6bd7fa631)# 🏆 Sistema de Carrito de Compras - Olimpíada Nacional de Programación 2025
+# 🏆 Sistema de Carrito de Compras - Olimpíada Nacional de Programación 2025
 
 Sistema completo de e-commerce para paquetes turísticos desarrollado para la Olimpíada Nacional de ETP 2025.
 
