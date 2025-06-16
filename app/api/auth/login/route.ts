@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { PrismaClient } from "@/lib/generated/prisma"
+import bcrypt from "bcrypt"
 
 // Función para crear respuesta JSON segura
 function createJsonResponse(data: any, status = 200) {
@@ -26,72 +28,13 @@ function createJsonResponse(data: any, status = 200) {
   }
 }
 
-// Función simple de hash (debe coincidir con register)
-function simpleHash(password: string): string {
-  let hash = 0
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-  return `simple_hash_${Math.abs(hash)}_${password.length}`
+// Función para verificar contraseñas con bcrypt
+async function verifyPassword(plainPassword: string, hashedPasswordFromDb: string): Promise<boolean> {
+  console.log("Verifying password with bcrypt...")
+  return await bcrypt.compare(plainPassword, hashedPasswordFromDb)
 }
 
-// Función para verificar contraseñas SIN bcrypt
-function verifyPassword(plainPassword: string, storedPassword: string): boolean {
-  console.log("Verifying password...")
-  console.log("Plain password length:", plainPassword.length)
-  console.log("Stored password preview:", storedPassword.substring(0, 20) + "...")
-
-  // Para usuarios hardcodeados, usar comparación directa de contraseñas conocidas
-  if (plainPassword === "admin123" && storedPassword.includes("LQv3c1yqBwEHFl5ePEjNNO")) {
-    console.log("Admin password verified (hardcoded)")
-    return true
-  }
-
-  if (plainPassword === "cliente123" && storedPassword.includes("92IXUNpkjO0rOQ5byMi")) {
-    console.log("Cliente password verified (hardcoded)")
-    return true
-  }
-
-  // Para usuarios registrados, usar nuestro hash simple
-  if (storedPassword.startsWith("simple_hash_")) {
-    const expectedHash = simpleHash(plainPassword)
-    const isValid = storedPassword === expectedHash
-    console.log("Simple hash verification:", isValid)
-    return isValid
-  }
-
-  // Fallback: comparación directa (solo para testing)
-  const directMatch = plainPassword === storedPassword
-  console.log("Direct comparison:", directMatch)
-  return directMatch
-}
-
-// Usuarios hardcodeados con contraseñas conocidas
-const HARDCODED_USERS = [
-  {
-    id: 1,
-    nombre: "Admin",
-    apellido: "Sistema",
-    email: "admin@turismoweb.com",
-    password: "$2a$12$LQv3c1yqBwEHFl5ePEjNNONciJ0MGhppMn5h1o3t7EFeCLww/Hjji", // admin123
-    rol: "admin",
-    activo: true,
-  },
-  {
-    id: 2,
-    nombre: "Cliente",
-    apellido: "Prueba",
-    email: "cliente@test.com",
-    password: "$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // cliente123
-    rol: "cliente",
-    activo: true,
-  },
-]
-
-// Lista de usuarios registrados (compartida con register)
-const registeredUsers: any[] = []
+const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,19 +71,11 @@ export async function POST(request: NextRequest) {
 
     console.log("Login attempt for:", email)
 
-    // Buscar usuario en hardcodeados primero
-    let user = HARDCODED_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.activo)
+    // Buscar usuario en la base de datos
+    const user = await prisma.usuario.findUnique({ where: { email: email.toLowerCase() } })
 
-    // Si no se encuentra, buscar en usuarios registrados
-    if (!user) {
-      user = registeredUsers.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.activo)
-      console.log("Searching in registered users, found:", !!user)
-    } else {
-      console.log("Found hardcoded user:", user.email)
-    }
-
-    if (!user) {
-      console.log("User not found:", email)
+    if (!user || !user.activo) {
+      console.log("User not found or inactive:", email)
       return createJsonResponse(
         {
           error: "Credenciales inválidas",
@@ -150,8 +85,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar contraseña SIN bcrypt
-    const isValidPassword = verifyPassword(password, user.password)
+    // Verificar contraseña con bcrypt
+    const isValidPassword = await verifyPassword(password, user.password)
 
     if (!isValidPassword) {
       console.log("Invalid password for:", email)
@@ -198,11 +133,6 @@ export async function POST(request: NextRequest) {
       user: userWithoutPassword,
       message: "Login exitoso",
       timestamp: new Date().toISOString(),
-      debug: {
-        userId: user.id,
-        role: user.rol,
-        tokenType: token.startsWith("simple_token") ? "simple" : "jwt",
-      },
     })
   } catch (error) {
     console.error("=== LOGIN API ERROR ===")
@@ -225,8 +155,6 @@ export async function GET() {
   return createJsonResponse(
     {
       message: "Login endpoint",
-      hardcoded_users: HARDCODED_USERS.length,
-      registered_users: registeredUsers.length,
       method: "Use POST to login",
       available_users: [
         { email: "admin@turismoweb.com", password: "admin123", rol: "admin" },

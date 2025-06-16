@@ -19,6 +19,7 @@ interface Usuario {
   rol: "cliente" | "admin" | "empleado"
   fecha_registro: string
   activo: boolean
+  departamento: string
 }
 
 interface Pedido {
@@ -93,7 +94,7 @@ async function writeJsonFile<T>(filePath: string, data: T): Promise<void> {
 }
 
 // Datos iniciales actualizados con más productos
-const initialProducts: Producto[] = [
+export const initialProducts: Producto[] = [
   {
     id: 1,
     codigo: "VUE001",
@@ -206,7 +207,7 @@ const initialProducts: Producto[] = [
   },
 ]
 
-const initialUsers: Usuario[] = [
+export const initialUsers: Usuario[] = [
   {
     id: 1,
     nombre: "Admin",
@@ -217,6 +218,7 @@ const initialUsers: Usuario[] = [
     rol: "admin",
     fecha_registro: new Date().toISOString(),
     activo: true,
+    departamento: "Sin departamento",
   },
   {
     id: 2,
@@ -228,6 +230,7 @@ const initialUsers: Usuario[] = [
     rol: "cliente",
     fecha_registro: new Date().toISOString(),
     activo: true,
+    departamento: "Sin departamento",
   },
 ]
 

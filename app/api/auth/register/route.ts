@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { PrismaClient } from "@/lib/generated/prisma"
+import bcrypt from "bcrypt"
 
 // Función para crear respuesta JSON segura
 function createJsonResponse(data: any, status = 200) {
@@ -26,7 +28,8 @@ function createJsonResponse(data: any, status = 200) {
   }
 }
 
-// Función simple de hash (debe coincidir con login)
+// Función simple de hash (ELIMINAR después de migrar usuarios existentes)
+/*
 function simpleHash(password: string): string {
   let hash = 0
   for (let i = 0; i < password.length; i++) {
@@ -36,9 +39,9 @@ function simpleHash(password: string): string {
   }
   return `simple_hash_${Math.abs(hash)}_${password.length}`
 }
+*/
 
-// Lista de usuarios registrados (compartida con login)
-const registeredUsers: any[] = []
+const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -98,19 +101,8 @@ export async function POST(request: NextRequest) {
 
     console.log("Registration attempt for:", email)
 
-    // Verificar si el usuario ya existe (incluyendo usuarios hardcodeados)
-    const hardcodedEmails = ["admin@turismoweb.com", "cliente@test.com"]
-    if (hardcodedEmails.includes(email.toLowerCase())) {
-      return createJsonResponse(
-        {
-          error: "Este email ya está registrado en el sistema",
-          success: false,
-        },
-        400,
-      )
-    }
-
-    const existingUser = registeredUsers.find((u) => u.email.toLowerCase() === email.toLowerCase())
+    // Verificar si el usuario ya existe en la base de datos
+    const existingUser = await prisma.usuario.findUnique({ where: { email: email.toLowerCase() } })
     if (existingUser) {
       return createJsonResponse(
         {
@@ -121,30 +113,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Crear hash de la contraseña usando nuestra función simple
-    const hashedPassword = simpleHash(password)
-    console.log("Password hashed successfully")
+    // Hashear la contraseña con bcrypt
+    const saltRounds = 10
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    console.log("Password hashed with bcrypt successfully")
 
-    // Crear usuario
-    const newUser = {
-      id: registeredUsers.length + 100, // Evitar conflictos con usuarios hardcodeados
-      nombre,
-      apellido,
-      email,
-      telefono: telefono || "",
-      password: hashedPassword,
-      rol: "cliente",
-      activo: true,
-      fecha_registro: new Date().toISOString(),
-    }
-
-    registeredUsers.push(newUser)
+    // Crear usuario en la base de datos
+    const newUser = await prisma.usuario.create({
+      data: {
+        nombre,
+        apellido,
+        email: email.toLowerCase(),
+        telefono: telefono || "",
+        password: hashedPassword,
+        rol: "cliente",
+        departamento: "", // Campo requerido en la BD, se puede dejar vacío para clientes
+        fecha_ingreso: new Date(), // Campo requerido en la BD
+        activo: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    })
 
     // Remover password del objeto de respuesta
     const { password: _, ...userWithoutPassword } = newUser
 
     console.log("Registration successful for:", email)
-    console.log("Total registered users:", registeredUsers.length)
 
     return createJsonResponse(
       {
@@ -176,9 +170,7 @@ export async function GET() {
   return createJsonResponse(
     {
       message: "Register endpoint",
-      registered_users_count: registeredUsers.length,
       method: "Use POST to register",
-      registered_users: registeredUsers.map((u) => ({ id: u.id, email: u.email, nombre: u.nombre })),
     },
     200,
   )
