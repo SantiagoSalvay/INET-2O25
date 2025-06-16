@@ -135,6 +135,7 @@ Sistema completo de e-commerce para paquetes turísticos desarrollado para la Ol
 - Página de inicio responsive
 ![image](https://github.com/user-attachments/assets/f0763699-280a-437b-9ea7-1926f8e7b2d8)
 ![image](https://github.com/user-attachments/assets/3a3115c5-228b-4067-9994-7165c355fd80)
+
 - Formularios de registro/login
 ![image](https://github.com/user-attachments/assets/3f84cbb0-f6fa-478a-ab06-3af985f93bbd)
 ![image](https://github.com/user-attachments/assets/06812c6f-fd03-4a00-a5ab-5396d099fd99)
