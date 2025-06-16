@@ -1,0 +1,16 @@
+{
+  "usuarios": [
+    {
+      "id": 200,
+      "nombre": "Santiago",
+      "apellido": "Salvay",
+      "email": "santi@proyecto.com",
+      "telefono": "0351158579473",
+      "password": "simple_hash_1091616949_7",
+      "rol": "empleado",
+      "departamento": "contabilidad",
+      "fecha_ingreso": "2025-06-16T01:07:11.480Z",
+      "activo": true
+    }
+  ]
+}

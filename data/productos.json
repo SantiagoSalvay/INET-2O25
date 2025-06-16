@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "codigo": "VUE0011",
+    "descripcion": "Vuelo Buenos Aires - Bariloche (ida y vuelta)",
+    "precio": 85000,
+    "categoria": "vuelos",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 2,
+    "codigo": "VUE002",
+    "descripcion": "Vuelo Buenos Aires - Mendoza (ida y vuelta)",
+    "precio": 75000,
+    "categoria": "vuelos",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 3,
+    "codigo": "VUE003",
+    "descripcion": "Vuelo Buenos Aires - Miami (ida y vuelta)",
+    "precio": 450000,
+    "categoria": "vuelos",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 4,
+    "codigo": "HOT001",
+    "descripcion": "Hotel 4 estrellas Bariloche (3 noches)",
+    "precio": 120000,
+    "categoria": "hoteles",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 5,
+    "codigo": "HOT002",
+    "descripcion": "Hotel 5 estrellas Mendoza (2 noches)",
+    "precio": 180000,
+    "categoria": "hoteles",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 6,
+    "codigo": "AUTO001",
+    "descripcion": "Alquiler auto económico (7 días)",
+    "precio": 45000,
+    "categoria": "autos",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 7,
+    "codigo": "PAQ001",
+    "descripcion": "Paquete Bariloche Completo (vuelo + hotel + auto)",
+    "precio": 220000,
+    "categoria": "paquetes",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "id": 8,
+    "codigo": "EXC001",
+    "descripcion": "Excursión Glaciar Perito Moreno",
+    "precio": 35000,
+    "categoria": "excursiones",
+    "fecha_creacion": "2024-01-01T00:00:00.000Z",
+    "activo": true
+  },
+  {
+    "codigo": "ARG150",
+    "descripcion": "Vuelo directo a Argentina",
+    "precio": 350000,
+    "categoria": "vuelos",
+    "id": 9,
+    "fecha_creacion": "2025-06-16T01:00:48.132Z",
+    "activo": true
+  }
+]

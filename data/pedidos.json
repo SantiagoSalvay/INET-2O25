@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "numero_pedido": "PED-1734301164000-1",
+    "usuario_id": 2,
+    "fecha_pedido": "2024-12-15T21:39:24.000Z",
+    "estado": "entregado",
+    "total": 85000,
+    "items": [
+      {
+        "producto_id": 1,
+        "producto_descripcion": "Vuelo Buenos Aires - Bariloche (ida y vuelta)",
+        "cantidad": 1,
+        "precio_unitario": 85000
+      }
+    ],
+    "cliente_nombre": "Cliente Prueba",
+    "cliente_email": "cliente@test.com"
+  },
+  {
+    "id": 2,
+    "numero_pedido": "PED-1734301164001-2",
+    "usuario_id": 2,
+    "fecha_pedido": "2024-12-14T10:30:00.000Z",
+    "estado": "entregado",
+    "total": 120000,
+    "items": [
+      {
+        "producto_id": 4,
+        "producto_descripcion": "Hotel 4 estrellas Bariloche (3 noches)",
+        "cantidad": 1,
+        "precio_unitario": 120000
+      }
+    ],
+    "cliente_nombre": "Cliente Prueba",
+    "cliente_email": "cliente@test.com"
+  },
+  {
+    "id": 3,
+    "numero_pedido": "PED-1734301164002-3",
+    "usuario_id": 2,
+    "fecha_pedido": "2024-12-13T15:45:00.000Z",
+    "estado": "cancelado",
+    "total": 450000,
+    "items": [
+      {
+        "producto_id": 3,
+        "producto_descripcion": "Vuelo Buenos Aires - Miami (ida y vuelta)",
+        "cantidad": 1,
+        "precio_unitario": 450000
+      }
+    ],
+    "cliente_nombre": "Cliente Prueba",
+    "cliente_email": "cliente@test.com"
+  },
+  {
+    "usuario_id": 2,
+    "estado": "cancelado",
+    "total": 350000,
+    "items": [
+      {
+        "producto_id": 9,
+        "producto_descripcion": "Vuelo directo a Argentina",
+        "cantidad": 1,
+        "precio_unitario": 350000
+      }
+    ],
+    "cliente_nombre": "Cliente Prueba",
+    "cliente_email": "cliente@test.com",
+    "id": 4,
+    "numero_pedido": "PED-1750035676148-4",
+    "fecha_pedido": "2025-06-16T01:01:16.148Z"
+  }
+]
