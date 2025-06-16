@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useEffect } from "react"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -148,6 +149,10 @@ export default function RegisterPage() {
       confirmPassword: "test123",
     })
   }
+
+  useEffect(() => {
+    document.title = "Registro";
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

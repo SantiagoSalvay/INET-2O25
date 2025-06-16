@@ -65,6 +65,10 @@ export default function ClienteDashboard() {
     fetchPedidos()
   }, [router])
 
+  useEffect(() => {
+    document.title = "Panel Cliente";
+  }, []);
+
   const fetchProductos = async () => {
     try {
       const response = await fetch("/api/productos", {

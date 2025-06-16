@@ -29,6 +29,10 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
+  useEffect(() => {
+    document.title = "Iniciar Sesión";
+  }, []);
+
   // Función para guardar token en cookies
   const setCookie = (name: string, value: string, days = 7) => {
     const expires = new Date()

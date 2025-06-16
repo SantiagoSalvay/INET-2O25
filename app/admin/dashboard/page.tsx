@@ -212,6 +212,10 @@ export default function AdminDashboard() {
     loadInitialData()
   }, [router])
 
+  useEffect(() => {
+    document.title = "Panel de Admin";
+  }, []);
+
   const loadInitialData = async () => {
     try {
       console.log("Loading initial data...")

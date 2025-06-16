@@ -220,6 +220,10 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
 }
 
 export default function HomePage() {
+  useEffect(() => {
+    document.title = "TurismoWeb";
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
