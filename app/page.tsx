@@ -163,9 +163,12 @@ export default function HomePage() {
     window.addEventListener('scroll', handleScroll)
 
     const storedUser = localStorage.getItem('user')
+    console.log('Stored user:', storedUser)
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser))
+        const parsedUser = JSON.parse(storedUser)
+        console.log('Parsed user:', parsedUser)
+        setUser(parsedUser)
       } catch (e) {
         console.error("Error parsing user from localStorage", e)
         localStorage.removeItem('user')
@@ -263,8 +266,10 @@ export default function HomePage() {
   }, []);
 
   const logout = () => {
+    console.log('Executing logout function')
     localStorage.removeItem("token")
     localStorage.removeItem("user")
+    setUser(null);
     router.push("/")
   }
 
@@ -315,33 +320,56 @@ export default function HomePage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                       <Avatar className="h-9 w-9">
-                        <AvatarFallback>{`${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`}</AvatarFallback>
+                        <AvatarFallback>
+                          {user ? (
+                            user.rol === 'admin'
+                              ? 'ADMIN'
+                              : user.rol === 'cliente'
+                                ? 'CLIENTE'
+                                : user.nombre && user.apellido
+                                  ? `${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`
+                                  : '?'
+                          ) : (
+                            '?'
+                          )}
+                        </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.nombre} {user.apellido}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                        <p className="text-sm font-medium leading-none">{user?.nombre} {user?.apellido}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user?.email}
+                        </p>
                       </div>
                     </DropdownMenuLabel>
+                    {user?.rol === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                          Panel de Administración
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {user?.rol === 'cliente' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
+                          Panel de Cliente
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/cliente/datos-personales')}>
+                          Datos Personales
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/cliente/compras')}>
+                          Mis Compras
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
-                    {user.rol === 'admin' && (
-                      <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard Admin</span>
-                      </DropdownMenuItem>
-                    )}
-                    {user.rol === 'cliente' && (
-                      <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard Cliente</span>
-                      </DropdownMenuItem>
-                    )}
                     <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
+                      Cerrar Sesión
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
