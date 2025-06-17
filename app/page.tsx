@@ -35,10 +35,34 @@ interface Product {
 }
 
 // Componente Carrusel reutilizable
-function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[]; itemsPerView?: number }) {
+function Carousel({ children, itemsPerView = { default: 1, sm: 2, md: 3, lg: 3 } }: 
+  { 
+    children: React.ReactNode[]; 
+    itemsPerView?: { default: number, sm?: number, md?: number, lg?: number, xl?: number }
+  }) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [effectiveItemsPerView, setEffectiveItemsPerView] = useState(itemsPerView.default);
   const totalItems = children.length
-  const maxIndex = Math.max(0, totalItems - itemsPerView)
+  const maxIndex = Math.max(0, totalItems - effectiveItemsPerView)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width >= 1024 && itemsPerView.lg) {
+        setEffectiveItemsPerView(itemsPerView.lg);
+      } else if (width >= 768 && itemsPerView.md) {
+        setEffectiveItemsPerView(itemsPerView.md);
+      } else if (width >= 640 && itemsPerView.sm) {
+        setEffectiveItemsPerView(itemsPerView.sm);
+      } else {
+        setEffectiveItemsPerView(itemsPerView.default);
+      }
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [itemsPerView]);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1))
@@ -51,7 +75,7 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000)
     return () => clearInterval(interval)
-  }, [maxIndex])
+  }, [maxIndex, effectiveItemsPerView]) // Add effectiveItemsPerView to dependencies
 
   return (
     <div className="relative group perspective-1000">
@@ -59,7 +83,7 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
         <div
           className="flex transition-all duration-700 ease-out"
           style={{
-            transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+            transform: `translateX(-${currentIndex * (100 / effectiveItemsPerView)}%)`,
           }}
         >
           {children.map((child, index) => (
@@ -70,7 +94,7 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
                   ? 'scale-100 opacity-100 rotate-y-0' 
                   : 'scale-95 opacity-70 rotate-y-10'
               }`} 
-              style={{ width: `${100 / itemsPerView}%` }}
+              style={{ width: `${100 / effectiveItemsPerView}%` }}
             >
               {child}
             </div>
@@ -514,7 +538,7 @@ export default function HomePage() {
               Error: {errorProducts}
             </div>
           ) : destinosPopulares.length > 0 ? (
-            <Carousel>
+            <Carousel itemsPerView={{ default: 1, sm: 2, md: 3, lg: 3 }}>
               {destinosPopulares.map((destino) => (
                 <Card key={destino.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <img
@@ -570,7 +594,7 @@ export default function HomePage() {
               Error: {errorProducts}
             </div>
           ) : paquetesDestacados.length > 0 ? (
-            <Carousel itemsPerView={2}>
+            <Carousel itemsPerView={{ default: 1, sm: 2, md: 2, lg: 2 }}>
               {paquetesDestacados.map((paquete) => (
                 <Card key={paquete.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <img
@@ -638,7 +662,7 @@ export default function HomePage() {
               Error: {errorProducts}
             </div>
           ) : experienciasUnicas.length > 0 ? (
-            <Carousel itemsPerView={3}>
+            <Carousel itemsPerView={{ default: 1, sm: 2, md: 3, lg: 3 }}>
               {experienciasUnicas.map((experiencia) => (
                 <Card key={experiencia.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <img

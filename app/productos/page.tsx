@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Search, ChevronRight, Menu, X, Plane, LogOut, User } from 'lucide-react'
+import { Search, ChevronRight, Menu, X, Plane, LogOut, User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Product {
@@ -430,6 +430,49 @@ export default function ProductsPage() {
           )}
         </div>
       </motion.div>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center mb-4">
+                <MapPin className="h-8 w-8 text-blue-400 mr-2" />
+                <h3 className="text-2xl font-bold">TurismoWeb</h3>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Tu agencia de viajes de confianza. Creamos experiencias únicas e inolvidables para cada tipo de viajero.
+              </p>
+              <p className="text-sm text-gray-500">Olimpíada Nacional de Programación 2025</p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Servicios</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Vuelos nacionales</li>
+                <li>Vuelos internacionales</li>
+                <li>Hoteles y estadías</li>
+                <li>Alquiler de autos</li>
+                <li>Paquetes completos</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contacto</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>📧 info@turismoweb.com</li>
+                <li>📞 +54 11 1234-5678</li>
+                <li>📍 Buenos Aires, Argentina</li>
+                <li>🕒 Lun-Vie 9:00-18:00</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 TurismoWeb. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 } 
