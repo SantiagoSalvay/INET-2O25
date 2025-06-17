@@ -110,7 +110,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     {user.rol === 'cliente' && (
                       <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
                         <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard Cliente</span>
+                        <span>Panel de Cliente</span>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={logout}>

@@ -356,12 +356,6 @@ export default function HomePage() {
                         <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
                           Panel de Cliente
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/cliente/datos-personales')}>
-                          Datos Personales
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/cliente/compras')}>
-                          Mis Compras
-                        </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuSeparator />
