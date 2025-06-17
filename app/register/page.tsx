@@ -139,17 +139,6 @@ export default function RegisterPage() {
     }
   }
 
-  const fillTestData = () => {
-    setFormData({
-      nombre: "Juan",
-      apellido: "Pérez",
-      email: "juan.perez@test.com",
-      telefono: "+54 11 1234-5678",
-      password: "test123",
-      confirmPassword: "test123",
-    })
-  }
-
   useEffect(() => {
     document.title = "Registro";
   }, []);
@@ -304,15 +293,6 @@ export default function RegisterPage() {
               <Link href="/login" className="text-blue-600 hover:underline">
                 Inicia sesión aquí
               </Link>
-            </div>
-
-            {/* Datos de prueba */}
-            <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <p className="text-sm font-medium text-yellow-800 mb-2">🧪 Datos de Prueba:</p>
-              <Button size="sm" variant="outline" onClick={fillTestData} className="text-xs" disabled={loading}>
-                Llenar con datos de prueba
-              </Button>
-              <p className="text-xs text-yellow-600 mt-2">ℹ️ Sistema sin bcrypt - usando hash simple para demo</p>
             </div>
           </CardContent>
         </Card>
