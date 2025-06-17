@@ -153,6 +153,12 @@ export default function ProductsPage() {
               <Link href="/productos" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Productos
               </Link>
+              <Link href="/sobre-nosotros" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Sobre Nosotros
+              </Link>
+              <Link href="/contacto" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Contacto
+              </Link>
               <Link href="/destinos" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Destinos
               </Link>
@@ -245,6 +251,20 @@ export default function ProductsPage() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Productos
+              </Link>
+              <Link 
+                href="/sobre-nosotros" 
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sobre Nosotros
+              </Link>
+              <Link 
+                href="/contacto" 
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contacto
               </Link>
               <Link 
                 href="/destinos" 

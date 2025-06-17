@@ -305,15 +305,12 @@ export default function HomePage() {
               <Link href="/productos" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Productos
               </Link>
-              <button onClick={() => scrollToSection('destinos')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
-                Destinos
-              </button>
-              <button onClick={() => scrollToSection('paquetes')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
-                Paquetes
-              </button>
-              <button onClick={() => scrollToSection('experiencias')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
-                Experiencias
-              </button>
+              <Link href="/sobre-nosotros" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Sobre Nosotros
+              </Link>
+              <Link href="/contacto" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Contacto
+              </Link>
               
               {user ? (
                 <DropdownMenu>
@@ -432,25 +429,18 @@ export default function HomePage() {
                 Productos
               </Link>
               <Link 
-                href="/destinos" 
+                href="/sobre-nosotros" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Destinos
+                Sobre Nosotros
               </Link>
               <Link 
-                href="/paquetes" 
+                href="/contacto" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Paquetes
-              </Link>
-              <Link 
-                href="/experiencias" 
-                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Experiencias
+                Contacto
               </Link>
               {user ? (
                 <div className="px-3 py-2 space-y-2">
