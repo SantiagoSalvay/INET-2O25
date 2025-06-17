@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
     "/api/health",
     "/api/test-json",
     "/api/status",
+    "/api/productos",
     "/test-auth",
   ]
 
@@ -27,7 +28,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Solo aplicar middleware a rutas específicas que necesitan autenticación
-  const protectedPaths = ["/admin", "/cliente", "/api/productos", "/api/pedidos", "/api/admin"]
+  const protectedPaths = ["/admin", "/cliente", "/api/pedidos", "/api/admin"]
   const isProtectedPath = protectedPaths.some((path) => pathname.startsWith(path))
 
   if (!isProtectedPath) {

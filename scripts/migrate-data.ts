@@ -1,10 +1,8 @@
-import { PrismaClient } from '../lib/generated/prisma'
+import { prisma } from '../lib/prisma'
 import fs from 'fs'
 import path from 'path'
 import { initialUsers, initialProducts } from '../lib/data-store' // Importar datos iniciales
 import bcrypt from 'bcryptjs' // Importar bcryptjs en lugar de bcrypt
-
-const prisma = new PrismaClient()
 
 async function migrateData() {
   try {
@@ -26,7 +24,7 @@ async function migrateData() {
             rol: user.rol,
             departamento: user.departamento || 'Sin departamento',
             activo: user.activo,
-            fecha_ingreso: new Date(user.fecha_registro),
+            fecha_ingreso: new Date(user.fecha_ingreso),
             updatedAt: new Date(),
           },
           create: {
@@ -37,7 +35,7 @@ async function migrateData() {
             password: hashedPassword,
             rol: user.rol,
             departamento: user.departamento || 'Sin departamento',
-            fecha_ingreso: new Date(user.fecha_registro),
+            fecha_ingreso: new Date(user.fecha_ingreso),
             activo: user.activo,
             createdAt: new Date(),
             updatedAt: new Date(),

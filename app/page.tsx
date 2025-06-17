@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock, Menu, X, LogOut, User } from "lucide-react"
+import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock, Menu, X, LogOut, User, Check } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -19,146 +19,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-// Datos de ejemplo para los carruseles
-const destinosPopulares = [
-  {
-    id: 1,
-    nombre: "Bariloche",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Paisajes de montaña y lagos cristalinos",
-    precio: "Desde $85.000",
-    categoria: "Nacional",
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    nombre: "Mendoza",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Capital mundial del vino",
-    precio: "Desde $75.000",
-    categoria: "Nacional",
-    rating: 4.7,
-  },
-  {
-    id: 3,
-    nombre: "Miami",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Playas paradisíacas y vida nocturna",
-    precio: "Desde $450.000",
-    categoria: "Internacional",
-    rating: 4.9,
-  },
-  {
-    id: 4,
-    nombre: "Madrid",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Historia, cultura y gastronomía",
-    precio: "Desde $650.000",
-    categoria: "Internacional",
-    rating: 4.6,
-  },
-  {
-    id: 5,
-    nombre: "Cancún",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Caribe mexicano todo incluido",
-    precio: "Desde $850.000",
-    categoria: "Internacional",
-    rating: 4.8,
-  },
-  {
-    id: 6,
-    nombre: "Barcelona",
-    imagen: "/placeholder.svg?height=200&width=300",
-    descripcion: "Arte, arquitectura y mediterráneo",
-    precio: "Desde $320.000",
-    categoria: "Internacional",
-    rating: 4.7,
-  },
-]
-
-const paquetesDestacados = [
-  {
-    id: 1,
-    titulo: "Paquete Bariloche Completo",
-    descripcion: "7 días con vuelo, hotel 4★ y auto incluido",
-    precio: 220000,
-    imagen: "/placeholder.svg?height=250&width=400",
-    incluye: ["Vuelo ida y vuelta", "Hotel 4 estrellas", "Auto 7 días", "Desayuno"],
-    duracion: "7 días",
-    personas: "2 personas",
-  },
-  {
-    id: 2,
-    titulo: "Europa Clásico",
-    descripcion: "15 días por Madrid, Barcelona y París",
-    precio: 1200000,
-    imagen: "/placeholder.svg?height=250&width=400",
-    incluye: ["Vuelos internacionales", "Hoteles 4★", "Tours guiados", "Traslados"],
-    duracion: "15 días",
-    personas: "2 personas",
-  },
-  {
-    id: 3,
-    titulo: "Caribe Todo Incluido",
-    descripcion: "10 días en resort 5★ en Cancún",
-    precio: 950000,
-    imagen: "/placeholder.svg?height=250&width=400",
-    incluye: ["Vuelo directo", "Resort 5 estrellas", "Todo incluido", "Actividades"],
-    duracion: "10 días",
-    personas: "2 personas",
-  },
-  {
-    id: 4,
-    titulo: "Mendoza Gourmet",
-    descripcion: "5 días con tours de vinos y gastronomía",
-    precio: 280000,
-    imagen: "/placeholder.svg?height=250&width=400",
-    incluye: ["Vuelo ida y vuelta", "Hotel boutique", "Tours de vinos", "Cenas gourmet"],
-    duracion: "5 días",
-    personas: "2 personas",
-  },
-]
-
-const experienciasUnicas = [
-  {
-    id: 1,
-    titulo: "Glaciar Perito Moreno",
-    descripcion: "Excursión al glaciar más famoso de Argentina",
-    precio: 35000,
-    imagen: "/placeholder.svg?height=200&width=300",
-    duracion: "1 día",
-    dificultad: "Fácil",
-  },
-  {
-    id: 2,
-    titulo: "Safari Península Valdés",
-    descripcion: "Avistaje de ballenas y fauna patagónica",
-    precio: 55000,
-    imagen: "/placeholder.svg?height=200&width=300",
-    duracion: "1 día",
-    dificultad: "Fácil",
-  },
-  {
-    id: 3,
-    titulo: "Trekking Torres del Paine",
-    descripcion: "Aventura en la Patagonia chilena",
-    precio: 180000,
-    imagen: "/placeholder.svg?height=200&width=300",
-    duracion: "3 días",
-    dificultad: "Difícil",
-  },
-  {
-    id: 4,
-    titulo: "City Tour Buenos Aires",
-    descripcion: "Descubre la capital argentina",
-    precio: 15000,
-    imagen: "/placeholder.svg?height=200&width=300",
-    duracion: "4 horas",
-    dificultad: "Fácil",
-  },
-]
+interface Product {
+  id: number;
+  codigo: string;
+  descripcion: string;
+  precio: number;
+  categoria: string;
+  detalles: string | null;
+  activo: boolean;
+  createdAt: string;
+  updatedAt: string;
+  imageUrl?: string; // Para usar en el frontend si es necesario
+}
 
 // Componente Carrusel reutilizable
 function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[]; itemsPerView?: number }) {
@@ -251,6 +125,9 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [user, setUser] = useState<{ nombre: string; apellido: string; email: string; rol: string } | null>(null)
   const [currentHeroWordIndex, setCurrentHeroWordIndex] = useState(0)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(true)
+  const [errorProducts, setErrorProducts] = useState<string | null>(null)
   const router = useRouter()
 
   const heroWords = ["Descubre el mundo", "Viaja", "Conoce", "Disfruta"]
@@ -275,11 +152,72 @@ export default function HomePage() {
       setCurrentHeroWordIndex((prevIndex) => (prevIndex + 1) % heroWords.length)
     }, 4000) // Cambia cada 4 segundos
 
+    const fetchAllProducts = async () => {
+      setLoadingProducts(true);
+      setErrorProducts(null);
+      try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch('/api/productos', {
+          headers,
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch products');
+        }
+        const data: Product[] = await response.json();
+        setAllProducts(data);
+      } catch (err) {
+        console.error("Error fetching all products:", err);
+        setErrorProducts(err instanceof Error ? err.message : 'Error desconocido al cargar productos');
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchAllProducts();
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
       clearInterval(heroWordInterval)
     }
   }, [])
+
+  // Filtrar productos para cada sección del carrusel
+  const destinosPopulares = allProducts.filter(p => p.categoria === 'vuelos' || p.categoria === 'hoteles').map(p => ({
+    id: p.id,
+    nombre: p.descripcion,
+    imagen: p.imageUrl || '/placeholder.jpg',
+    descripcion: p.detalles || p.descripcion,
+    precio: `Desde $${p.precio.toLocaleString()}`,
+    categoria: p.categoria,
+    rating: 4.5, // Placeholder rating
+  }));
+
+  const paquetesDestacados = allProducts.filter(p => p.categoria === 'paquetes').map(p => ({
+    id: p.id,
+    titulo: p.descripcion,
+    descripcion: p.detalles || p.descripcion,
+    precio: p.precio,
+    imagen: p.imageUrl || '/placeholder.jpg',
+    incluye: ['Vuelo', 'Hotel', 'Actividades'], // Placeholder
+    duracion: 'X días', // Placeholder
+    personas: 'Y personas', // Placeholder
+  }));
+
+  const experienciasUnicas = allProducts.filter(p => p.categoria === 'excursiones').map(p => ({
+    id: p.id,
+    titulo: p.descripcion,
+    descripcion: p.detalles || p.descripcion,
+    precio: p.precio,
+    imagen: p.imageUrl || '/placeholder.jpg',
+    duracion: 'X horas', // Placeholder
+    dificultad: 'Fácil', // Placeholder
+  }));
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -335,6 +273,9 @@ export default function HomePage() {
               <button onClick={() => scrollToSection('hero')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Inicio
               </button>
+              <Link href="/productos" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Productos
+              </Link>
               <button onClick={() => scrollToSection('destinos')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Destinos
               </button>
@@ -383,14 +324,24 @@ export default function HomePage() {
               ) : (
                 <>
                   <Link href="/login">
-                    <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
-                      Iniciar Sesión
-                    </Button>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        Iniciar Sesión
+                      </Button>
+                    </motion.div>
                   </Link>
                   <Link href="/register">
-                    <Button className="bg-blue-600 hover:bg-blue-700 transition-all duration-300">
-                      Registrarse
-                    </Button>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button className="bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+                        Registrarse
+                      </Button>
+                    </motion.div>
                   </Link>
                 </>
               )}
@@ -414,30 +365,41 @@ export default function HomePage() {
         {isMenuOpen && (
           <div className="md:hidden bg-white/90 backdrop-blur-md shadow-lg py-4 px-4 border-b border-gray-200/20">
             <div className="flex flex-col space-y-2">
-              <button 
-                onClick={() => scrollToSection('hero')} 
+              <Link 
+                href="/" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Inicio
-              </button>
-              <button 
-                onClick={() => scrollToSection('destinos')} 
+              </Link>
+              <Link 
+                href="/productos" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Productos
+              </Link>
+              <Link 
+                href="/destinos" 
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Destinos
-              </button>
-              <button 
-                onClick={() => scrollToSection('paquetes')} 
+              </Link>
+              <Link 
+                href="/paquetes" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Paquetes
-              </button>
-              <button 
-                onClick={() => scrollToSection('experiencias')} 
+              </Link>
+              <Link 
+                href="/experiencias" 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Experiencias
-              </button>
+              </Link>
               {user ? (
                 <div className="px-3 py-2 space-y-2">
                   <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
@@ -483,7 +445,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 relative overflow-hidden">
+      <section id="hero" className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-5xl font-extrabold text-gray-900 sm:text-6xl mb-6">
@@ -506,254 +468,215 @@ export default function HomePage() {
             pasajes aéreos, alquiler de autos y paquetes completos.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="text-lg px-8 py-4">
-                Comenzar a explorar
-              </Button>
+            <Link href="/productos">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button size="lg" className="text-lg px-8 py-4">
+                  Comenzar a explorar
+                </Button>
+              </motion.div>
             </Link>
             <Link href="/manual">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4">
-                Ver manual
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button size="lg" variant="outline" className="text-lg px-8 py-4">
+                  Ver manual
+                </Button>
+              </motion.div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Servicios */}
-      <section className="py-16 bg-white">
+      {/* Destinos Populares Section */}
+      <section id="destinos" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Nuestros Servicios</h3>
-            <p className="text-xl text-gray-600">Todo lo que necesitas para tu viaje perfecto</p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="text-center">
-                <Plane className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-xl">Pasajes Aéreos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center">
-                  Vuelos nacionales e internacionales con las mejores tarifas y horarios flexibles
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="text-center">
-                <Hotel className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-xl">Estadías</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center">
-                  Hoteles y alojamientos en los mejores destinos, desde económicos hasta lujo
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="text-center">
-                <Car className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-xl">Alquiler de Autos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center">
-                  Vehículos para que explores con total libertad, desde económicos hasta premium
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="text-center">
-                <MapPin className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-xl">Paquetes Completos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center">
-                  Experiencias completas con todo incluido, diseñadas para cada tipo de viajero
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Destinos Populares */}
-      <section id="destinos" className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Destinos Populares</h3>
-            <p className="text-xl text-gray-600">Los lugares más elegidos por nuestros viajeros</p>
-          </div>
-
-          <Carousel itemsPerView={3}>
-            {destinosPopulares.map((destino) => (
-              <Card
-                key={destino.id}
-                className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-              >
-                <div className="relative overflow-hidden rounded-t-lg">
+          <motion.h2
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-extrabold text-gray-900 text-center mb-12"
+          >
+            Destinos Populares
+          </motion.h2>
+          {loadingProducts ? (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p>Cargando destinos...</p>
+            </div>
+          ) : errorProducts ? (
+            <div className="text-center py-10 text-red-600">
+              Error: {errorProducts}
+            </div>
+          ) : destinosPopulares.length > 0 ? (
+            <Carousel>
+              {destinosPopulares.map((destino) => (
+                <Card key={destino.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <img
-                    src={destino.imagen || "/placeholder.svg"}
+                    src={destino.imagen}
                     alt={destino.nombre}
-                    className="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-48 object-cover rounded-t-lg"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <Badge className="absolute top-3 left-3 bg-blue-600/90 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">{destino.categoria}</Badge>
-                  <div className="absolute top-3 right-3 bg-white/10 backdrop-blur-md rounded-full px-2 py-1 flex items-center transform group-hover:scale-105 transition-transform duration-300 border border-white/20">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium ml-1 text-white">{destino.rating}</span>
-                  </div>
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl group-hover:text-blue-600 transition-colors duration-300">{destino.nombre}</CardTitle>
-                  <CardDescription className="text-gray-600">{destino.descripcion}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">{destino.precio}</span>
+                  <CardContent className="p-4">
+                    <CardTitle className="text-xl font-bold mb-2 truncate">{destino.nombre}</CardTitle>
+                    <CardDescription className="text-gray-600 text-sm mb-2">{destino.descripcion}</CardDescription>
+                    <div className="flex items-center mb-2">
+                      <Star className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" />
+                      <span className="text-gray-700">{destino.rating.toFixed(1)}</span>
+                    </div>
+                    <p className="text-blue-600 text-lg font-semibold mb-4">{destino.precio}</p>
                     <Button 
-                      size="sm" 
-                      className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
-                      onClick={() => handleViewMore(destino.id, 'destinos')}
+                      onClick={() => handleViewMore(destino.id, 'destino')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
                     >
-                      Ver más
+                      Ver Detalles <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </Carousel>
+                  </CardContent>
+                </Card>
+              ))}
+            </Carousel>
+          ) : (
+            <div className="text-center py-10 text-gray-600">
+              No se encontraron destinos populares.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Paquetes Destacados */}
-      <section id="paquetes" className="py-16 bg-white">
+      {/* Paquetes Destacados Section */}
+      <section id="paquetes" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Paquetes Destacados</h3>
-            <p className="text-xl text-gray-600">Ofertas especiales con todo incluido</p>
-          </div>
-
-          <Carousel itemsPerView={2}>
-            {paquetesDestacados.map((paquete) => (
-              <Card key={paquete.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-                <div className="relative overflow-hidden rounded-t-lg">
+          <motion.h2
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-extrabold text-gray-900 text-center mb-12"
+          >
+            Paquetes Destacados
+          </motion.h2>
+          {loadingProducts ? (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p>Cargando paquetes...</p>
+            </div>
+          ) : errorProducts ? (
+            <div className="text-center py-10 text-red-600">
+              Error: {errorProducts}
+            </div>
+          ) : paquetesDestacados.length > 0 ? (
+            <Carousel itemsPerView={2}>
+              {paquetesDestacados.map((paquete) => (
+                <Card key={paquete.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <img
-                    src={paquete.imagen || "/placeholder.svg"}
+                    src={paquete.imagen}
                     alt={paquete.titulo}
-                    className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-48 object-cover rounded-t-lg"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-3 left-3 bg-white/10 backdrop-blur-md rounded-lg px-3 py-1 flex items-center space-x-4 transform group-hover:scale-105 transition-transform duration-300 border border-white/20">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 text-white mr-1" />
-                      <span className="text-sm text-white">{paquete.duracion}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 text-white mr-1" />
-                      <span className="text-sm text-white">{paquete.personas}</span>
-                    </div>
-                  </div>
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl group-hover:text-blue-600 transition-colors duration-300">{paquete.titulo}</CardTitle>
-                  <CardDescription className="text-gray-600">{paquete.descripcion}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Incluye:</h4>
-                      <div className="grid grid-cols-2 gap-1">
-                        {paquete.incluye.map((item, index) => (
-                          <div key={index} className="flex items-center text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
-                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2 transform group-hover:scale-125 transition-transform duration-300 shadow-[0_0_8px_rgba(37,99,235,0.3)]"></div>
-                            {item}
-                          </div>
-                        ))}
+                  <CardContent className="p-4">
+                    <CardTitle className="text-xl font-bold mb-2 truncate">{paquete.titulo}</CardTitle>
+                    <CardDescription className="text-gray-600 text-sm mb-2">{paquete.descripcion}</CardDescription>
+                    <ul className="text-gray-700 text-sm mb-4 space-y-1">
+                      {paquete.incluye.map((item, i) => (
+                        <li key={i} className="flex items-center">
+                          <Check className="h-4 w-4 text-green-500 mr-2" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" /> {paquete.duracion}
+                      </div>
+                      <div className="flex items-center">
+                        <Users className="h-4 w-4 mr-1" /> {paquete.personas}
                       </div>
                     </div>
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                      <div>
-                        <span className="text-sm text-gray-500">Desde</span>
-                        <div className="text-2xl font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">${paquete.precio.toLocaleString()}</div>
-                      </div>
-                      <Button className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
-                        onClick={() => handleViewMore(paquete.id, 'paquetes')}
-                      >
-                        Reservar ahora
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </Carousel>
-        </div>
-      </section>
-
-      {/* Experiencias Únicas */}
-      <section id="experiencias" className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-extrabold text-gray-900 mb-4">Experiencias Únicas</h3>
-            <p className="text-xl text-gray-600">Aventuras y excursiones que no puedes perderte</p>
-          </div>
-
-          <Carousel itemsPerView={4}>
-            {experienciasUnicas.map((experiencia) => (
-              <Card key={experiencia.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-                <div className="relative overflow-hidden rounded-t-lg">
-                  <img
-                    src={experiencia.imagen || "/placeholder.svg"}
-                    alt={experiencia.titulo}
-                    className="w-full h-40 object-cover transform group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <Badge
-                    className={`absolute top-3 right-3 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300 border border-white/20 ${
-                      experiencia.dificultad === "Fácil"
-                        ? "bg-green-500/90 shadow-[0_4px_16px_rgba(34,197,94,0.3)]"
-                        : experiencia.dificultad === "Difícil"
-                          ? "bg-red-500/90 shadow-[0_4px_16px_rgba(239,68,68,0.3)]"
-                          : "bg-yellow-500/90 shadow-[0_4px_16px_rgba(234,179,8,0.3)]"
-                    }`}
-                  >
-                    {experiencia.dificultad}
-                  </Badge>
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-300">{experiencia.titulo}</CardTitle>
-                  <CardDescription className="text-sm text-gray-600">{experiencia.descripcion}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
-                      <Clock className="h-4 w-4 mr-1 transform group-hover:scale-110 transition-transform duration-300" />
-                      {experiencia.duracion}
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">${experiencia.precio.toLocaleString()}</span>
+                    <p className="text-blue-600 text-lg font-semibold mb-4">${paquete.precio.toLocaleString()}</p>
                     <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform group-hover:scale-105 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
-                      onClick={() => handleViewMore(experiencia.id, 'experiencias')}
+                      onClick={() => handleViewMore(paquete.id, 'paquete')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
                     >
-                      Ver más
+                      Ver Detalles <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </Carousel>
+                  </CardContent>
+                </Card>
+              ))}
+            </Carousel>
+          ) : (
+            <div className="text-center py-10 text-gray-600">
+              No se encontraron paquetes destacados.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Experiencias Únicas Section */}
+      <section id="experiencias" className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.h2
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-extrabold text-gray-900 text-center mb-12"
+          >
+            Experiencias Únicas
+          </motion.h2>
+          {loadingProducts ? (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p>Cargando experiencias...</p>
+            </div>
+          ) : errorProducts ? (
+            <div className="text-center py-10 text-red-600">
+              Error: {errorProducts}
+            </div>
+          ) : experienciasUnicas.length > 0 ? (
+            <Carousel itemsPerView={3}>
+              {experienciasUnicas.map((experiencia) => (
+                <Card key={experiencia.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <img
+                    src={experiencia.imagen}
+                    alt={experiencia.titulo}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  <CardContent className="p-4">
+                    <CardTitle className="text-xl font-bold mb-2 truncate">{experiencia.titulo}</CardTitle>
+                    <CardDescription className="text-gray-600 text-sm mb-2">{experiencia.descripcion}</CardDescription>
+                    <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" /> {experiencia.duracion}
+                      </div>
+                      <div className="flex items-center">
+                        <Badge variant="outline" className="text-xs py-1 px-2 rounded-full">{experiencia.dificultad}</Badge>
+                      </div>
+                    </div>
+                    <p className="text-blue-600 text-lg font-semibold mb-4">${experiencia.precio.toLocaleString()}</p>
+                    <Button 
+                      onClick={() => handleViewMore(experiencia.id, 'experiencia')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
+                    >
+                      Ver Detalles <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </Carousel>
+          ) : (
+            <div className="text-center py-10 text-gray-600">
+              No se encontraron experiencias únicas.
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CTA Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 animate-pulse"></div>

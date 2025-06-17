@@ -225,7 +225,7 @@ export const initialUsers: Usuario[] = [
     apellido: "Sistema",
     email: "admin@turismoweb.com",
     telefono: "+54 11 1234-5678",
-    password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // admin123
+    password: "admin123", // admin123
     rol: "admin",
     fecha_ingreso: new Date().toISOString(),
     activo: true,
@@ -239,7 +239,7 @@ export const initialUsers: Usuario[] = [
     apellido: "Prueba",
     email: "cliente@test.com",
     telefono: "+54 11 9876-5432",
-    password: "$2b$10$CSqG17jGrLu45aXAYvgp0.I6TsMSbu21mDHPyh3/PqD.w0gvO1Xzq", // cliente123
+    password: "cliente123", // cliente123
     rol: "cliente",
     fecha_ingreso: new Date().toISOString(),
     activo: true,
@@ -344,7 +344,7 @@ export async function getStats() {
   try {
     const [products, orders, users] = await Promise.all([
       prisma.producto.findMany({ where: { activo: true } }),
-      prisma.pedido.findMany() as Pedido[],
+      prisma.pedido.findMany() as unknown as Pedido[],
       prisma.usuario.findMany({ where: { rol: 'cliente', activo: true } })
     ]);
 

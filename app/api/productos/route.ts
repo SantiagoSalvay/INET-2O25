@@ -6,43 +6,35 @@ export async function GET(request: NextRequest) {
     console.log("=== PRODUCTOS API GET ===")
 
     const authHeader = request.headers.get("authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Token no proporcionado" },
-        { status: 401, headers: { "Content-Type": "application/json" } },
-      )
+    let token: string | null = null
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7)
+      console.log("Token received:", token.substring(0, 20) + "...")
     }
 
-    const token = authHeader.substring(7)
-    console.log("Token received:", token.substring(0, 20) + "...")
-
-    // Verificar token simple o JWT
-    let decoded: any
-    try {
-      if (token.startsWith("simple_token_")) {
-        // Token simple - extraer info básica
-        const parts = token.split("_")
-        decoded = {
-          userId: Number.parseInt(parts[2]),
-          email: "admin@turismoweb.com", // Fallback
-          rol: "admin",
+    let decoded: any = null
+    if (token) {
+      try {
+        if (token.startsWith("simple_token_")) {
+          const parts = token.split("_")
+          decoded = {
+            userId: Number.parseInt(parts[2]),
+            email: "admin@turismoweb.com", 
+            rol: "admin",
+          }
+          console.log("Simple token decoded:", decoded)
+        } else {
+          const jwt = await import("jsonwebtoken")
+          decoded = jwt.verify(token, process.env.JWT_SECRET || "olimpiada-turismo-2025-secret-key") as any
+          console.log("JWT token decoded:", decoded)
         }
-        console.log("Simple token decoded:", decoded)
-      } else {
-        // JWT token
-        const jwt = await import("jsonwebtoken")
-        decoded = jwt.verify(token, process.env.JWT_SECRET || "olimpiada-turismo-2025-secret-key") as any
-        console.log("JWT token decoded:", decoded)
+      } catch (tokenError) {
+        console.error("Token verification failed (but continuing for public access):", tokenError)
+        // No retornamos 401 aquí, permitimos el acceso público si falla la verificación del token
       }
-    } catch (tokenError) {
-      console.error("Token verification failed:", tokenError)
-      return NextResponse.json(
-        { error: "Token inválido" },
-        { status: 401, headers: { "Content-Type": "application/json" } },
-      )
     }
 
-    console.log("Getting products for user:", decoded.email)
+    console.log("Getting products.")
 
     const productos = await getProducts()
     console.log("Products loaded:", productos.length)
@@ -121,7 +113,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { codigo, descripcion, precio, categoria } = body
+    const { codigo, descripcion, precio, categoria, detalles } = body
 
     // Validaciones
     if (!codigo || !descripcion || !precio || !categoria) {
@@ -152,6 +144,8 @@ export async function POST(request: NextRequest) {
       descripcion,
       precio: Number.parseFloat(precio),
       categoria,
+      detalles: detalles || null,
+      activo: true,
     })
 
     console.log("Product created successfully:", newProduct.codigo)
