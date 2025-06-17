@@ -97,11 +97,11 @@ export default function LoginPage() {
         setSuccessMessage("Iniciando sesión...")
 
         setTimeout(() => {
-          console.log("Redirecting to:", data.user.rol === "admin" ? "/admin/dashboard" : "/cliente/dashboard")
+          console.log("Redirecting to:", data.user.rol === "admin" ? "/admin/dashboard" : "/")
           if (data.user.rol === "admin") {
             window.location.href = "/admin/dashboard"
           } else {
-            window.location.href = "/cliente/dashboard"
+            window.location.href = "/"
           }
         }, 500)
       } else {
