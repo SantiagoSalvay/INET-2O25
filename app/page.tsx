@@ -7,7 +7,18 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock, Menu, X } from "lucide-react"
+import { MapPin, Plane, Car, Hotel, Star, ChevronLeft, ChevronRight, Calendar, Users, Clock, Menu, X, LogOut, User } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Datos de ejemplo para los carruseles
 const destinosPopulares = [
@@ -233,16 +244,41 @@ function Carousel({ children, itemsPerView = 3 }: { children: React.ReactNode[];
   )
 }
 
+const animatingWords = ["Web", "Fast", "Easy", "Safe"]
+
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [user, setUser] = useState<{ nombre: string; apellido: string; email: string; rol: string } | null>(null)
+  const [currentHeroWordIndex, setCurrentHeroWordIndex] = useState(0)
+  const router = useRouter()
+
+  const heroWords = ["Descubre el mundo", "Viaja", "Conoce", "Disfruta"]
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (e) {
+        console.error("Error parsing user from localStorage", e)
+        localStorage.removeItem('user')
+      }
+    }
+
+    const heroWordInterval = setInterval(() => {
+      setCurrentHeroWordIndex((prevIndex) => (prevIndex + 1) % heroWords.length)
+    }, 4000) // Cambia cada 4 segundos
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearInterval(heroWordInterval)
+    }
   }, [])
 
   const scrollToSection = (sectionId: string) => {
@@ -264,6 +300,20 @@ export default function HomePage() {
     document.title = "TurismoWeb";
   }, []);
 
+  const logout = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    router.push("/")
+  }
+
+  const handleViewMore = (id: number, type: string) => {
+    if (user) {
+      router.push(`/${type}/${id}`)
+    } else {
+      router.push("/login")
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navbar */}
@@ -277,89 +327,156 @@ export default function HomePage() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
               <Plane className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">TravelEase</span>
+              <span className="text-xl font-bold text-gray-900">TravelWeb</span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => scrollToSection('destinos')}
-                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
-              >
+              <button onClick={() => scrollToSection('hero')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                Inicio
+              </button>
+              <button onClick={() => scrollToSection('destinos')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Destinos
               </button>
-              <button 
-                onClick={() => scrollToSection('paquetes')}
-                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
-              >
+              <button onClick={() => scrollToSection('paquetes')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Paquetes
               </button>
-              <button 
-                onClick={() => scrollToSection('experiencias')}
-                className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
-              >
+              <button onClick={() => scrollToSection('experiencias')} className="text-gray-600 hover:text-blue-600 transition-colors duration-300">
                 Experiencias
               </button>
-              <Link href="/login">
-                <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
-                  Iniciar Sesión
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button className="bg-blue-600 hover:bg-blue-700 transition-all duration-300">
-                  Registrarse
-                </Button>
-              </Link>
+              
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback>{`${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.nombre} {user.apellido}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {user.rol === 'admin' && (
+                      <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Dashboard Admin</span>
+                      </DropdownMenuItem>
+                    )}
+                    {user.rol === 'cliente' && (
+                      <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Dashboard Cliente</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Cerrar Sesión</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button className="bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+                      Registrarse
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-600" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-600" />
-              )}
-            </button>
+            {/* Mobile Navigation */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-gray-600 hover:text-blue-600"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200/20">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden bg-white/90 backdrop-blur-md shadow-lg py-4 px-4 border-b border-gray-200/20">
+            <div className="flex flex-col space-y-2">
               <button 
-                onClick={() => scrollToSection('destinos')}
+                onClick={() => scrollToSection('hero')} 
+                className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
+              >
+                Inicio
+              </button>
+              <button 
+                onClick={() => scrollToSection('destinos')} 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
               >
                 Destinos
               </button>
               <button 
-                onClick={() => scrollToSection('paquetes')}
+                onClick={() => scrollToSection('paquetes')} 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
               >
                 Paquetes
               </button>
               <button 
-                onClick={() => scrollToSection('experiencias')}
+                onClick={() => scrollToSection('experiencias')} 
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-300"
               >
                 Experiencias
               </button>
-              <div className="px-3 py-2 space-y-2">
-                <Link href="/login" className="block w-full">
+              {user ? (
+                <div className="px-3 py-2 space-y-2">
                   <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
-                    Iniciar Sesión
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{user.nombre}</span>
                   </Button>
-                </Link>
-                <Link href="/register" className="block w-full">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300">
-                    Registrarse
+                  {user.rol === 'admin' && (
+                    <Link href="/admin/dashboard" className="block w-full">
+                      <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        Dashboard Admin
+                      </Button>
+                    </Link>
+                  )}
+                  {user.rol === 'cliente' && (
+                    <Link href="/cliente/dashboard" className="block w-full">
+                      <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        Dashboard Cliente
+                      </Button>
+                    </Link>
+                  )}
+                  <Button onClick={logout} className="w-full bg-red-600 hover:bg-red-700 transition-all duration-300">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
                   </Button>
-                </Link>
-              </div>
+                </div>
+              ) : (
+                <div className="px-3 py-2 space-y-2">
+                  <Link href="/login" className="block w-full">
+                    <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href="/register" className="block w-full">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+                      Registrarse
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -370,7 +487,18 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-5xl font-extrabold text-gray-900 sm:text-6xl mb-6">
-            Descubre el mundo
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={currentHeroWordIndex}
+                className="inline-block"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                {heroWords[currentHeroWordIndex]}
+              </motion.span>
+            </AnimatePresence>
             <span className="text-blue-600"> con nosotros</span>
           </h2>
           <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -489,6 +617,7 @@ export default function HomePage() {
                     <Button 
                       size="sm" 
                       className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
+                      onClick={() => handleViewMore(destino.id, 'destinos')}
                     >
                       Ver más
                     </Button>
@@ -551,7 +680,9 @@ export default function HomePage() {
                         <span className="text-sm text-gray-500">Desde</span>
                         <div className="text-2xl font-bold text-blue-600 group-hover:scale-105 transition-transform duration-300">${paquete.precio.toLocaleString()}</div>
                       </div>
-                      <Button className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]">
+                      <Button className="bg-blue-600/90 hover:bg-blue-700 transform group-hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
+                        onClick={() => handleViewMore(paquete.id, 'paquetes')}
+                      >
                         Reservar ahora
                       </Button>
                     </div>
@@ -610,6 +741,7 @@ export default function HomePage() {
                       size="sm" 
                       variant="outline" 
                       className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform group-hover:scale-105 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.5)]"
+                      onClick={() => handleViewMore(experiencia.id, 'experiencias')}
                     >
                       Ver más
                     </Button>

@@ -3,11 +3,46 @@ import path from "path"
 import { prisma } from "./prisma"
 
 // Definir tipos basados en el schema de Prisma
-type Usuario = any
+type Usuario = {
+  id: number
+  nombre: string
+  apellido: string
+  email: string
+  telefono?: string | null
+  password: string
+  rol: string
+  departamento: string
+  fecha_ingreso: Date | string
+  activo: boolean
+  createdAt: Date | string
+  updatedAt: Date | string
+}
 
-type Producto = any
+type Producto = {
+  id: number
+  codigo: string
+  descripcion: string
+  precio: number
+  categoria: string
+  detalles: string | null
+  activo: boolean
+  createdAt: Date | string
+  updatedAt: Date | string
+}
 
-type Pedido = any
+type Pedido = {
+  id: number
+  numero_pedido: string
+  cliente_nombre: string
+  cliente_email: string
+  fecha_pedido: Date | string
+  estado: string
+  total: number
+  detalles: any
+  usuarioId: number
+  createdAt: Date | string
+  updatedAt: Date | string
+}
 
 // Rutas de los archivos JSON
 const DATA_DIR = path.join(process.cwd(), "data")
@@ -223,7 +258,7 @@ export async function getUserByEmail(email: string) {
   return await prisma.usuario.findUnique({ where: { email } });
 }
 
-export async function createUser(userData: Omit<Usuario, 'id' | 'createdAt' | 'updatedAt'>) {
+export async function createUser(userData: Omit<Usuario, 'id' | 'createdAt' | 'updatedAt' | 'fecha_ingreso'>) {
   const now = new Date()
   return await prisma.usuario.create({
     data: {
@@ -309,7 +344,7 @@ export async function getStats() {
   try {
     const [products, orders, users] = await Promise.all([
       prisma.producto.findMany({ where: { activo: true } }),
-      prisma.pedido.findMany(),
+      prisma.pedido.findMany() as Pedido[],
       prisma.usuario.findMany({ where: { rol: 'cliente', activo: true } })
     ]);
 
