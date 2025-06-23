@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken"
 import { getOrders, createOrder, getUserByEmail, getProducts, getUsers } from "@/lib/data-store"
 import { prisma } from '@/lib/prisma'
 import { v4 as uuidv4 } from 'uuid'
+import { sendEmail } from '@/lib/send-email'
+import fs from 'fs/promises'
+import path from 'path'
 
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get("authorization")
@@ -92,18 +95,21 @@ export async function POST(req: Request) {
       fecha,
       total,
       precio,
-      comprobanteNombre
+      comprobanteNombre,
+      cliente_nombre,
+      cliente_email,
+      detalles
     } = data
 
     const pedido = await prisma.pedido.create({
       data: {
         numero_pedido: uuidv4(),
-        cliente_nombre: data.cliente_nombre || '',
-        cliente_email: data.cliente_email || '',
+        cliente_nombre: cliente_nombre || '',
+        cliente_email: cliente_email || '',
         fecha_pedido: new Date(),
         estado: 'pendiente',
         total,
-        detalles: {
+        detalles: detalles || {
           cantidad,
           asientos,
           fecha,
@@ -113,8 +119,28 @@ export async function POST(req: Request) {
         usuarioId: userId,
       },
     })
+
+    // Leer mail del sector desde config.json
+    const configPath = path.join(process.cwd(), 'data', 'config.json')
+    const configRaw = await fs.readFile(configPath, 'utf-8')
+    const config = JSON.parse(configRaw)
+    const sectorEmail = config.sector_email
+
+    // Enviar mail al cliente
+    await sendEmail({
+      to: cliente_email,
+      subject: 'Confirmación de pedido',
+      text: `Hola ${cliente_nombre}, tu pedido #${pedido.numero_pedido} fue registrado por un total de $${total}.`,
+    })
+    // Enviar mail al sector
+    await sendEmail({
+      to: sectorEmail,
+      subject: 'Nuevo pedido registrado',
+      text: `Se registró un nuevo pedido #${pedido.numero_pedido} de ${cliente_nombre} (${cliente_email}) por un total de $${total}.`,
+    })
+
     return NextResponse.json({ success: true, pedido })
   } catch (error) {
-    return NextResponse.json({ success: false, error: error?.message || 'Error al crear pedido' }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Error al crear pedido' }, { status: 500 })
   }
 }

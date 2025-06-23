@@ -21,6 +21,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Search, ChevronRight, Menu, X, Plane, LogOut, User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import MainLayout from '@/components/layout/main-layout'
+import { useCart } from '@/components/cart-context'
+import CartSidebar from '@/components/ui/cart-sidebar'
+import { useToast } from '@/hooks/use-toast'
 
 interface Product {
   id: number;
@@ -57,6 +60,8 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null)
   const [availableCategories, setAvailableCategories] = useState<string[]>([])
   const router = useRouter()
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -237,6 +242,12 @@ export default function ProductsPage() {
                     <CardContent className="p-4">
                       <CardTitle className="text-xl font-bold mb-2 truncate">{product.name}</CardTitle>
                       <p className="text-blue-600 text-lg font-semibold mb-4">${product.price}</p>
+                      <Button className="w-full mb-2 bg-green-600 hover:bg-green-700" onClick={() => {
+                        addToCart({ id: product.id, codigo: product.codigo, name: product.name, price: product.price });
+                        toast({ title: 'Producto agregado', description: `${product.name} se agregó al carrito.` });
+                      }}>
+                        Agregar al carrito
+                      </Button>
                       <Link href={`/producto/${slugify(product.name)}/${product.codigo}`}>
                         <Button className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300">
                           Ver Detalles <ChevronRight className="ml-1 h-4 w-4" />

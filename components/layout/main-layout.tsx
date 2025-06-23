@@ -14,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plane, Menu, X, LogOut, User, Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react'
+import { Plane, Menu, X, LogOut, User, Facebook, Twitter, Instagram, Mail, Phone, MapPin, ShoppingCart } from 'lucide-react'
+import CartSidebar from '@/components/ui/cart-sidebar'
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [user, setUser] = useState<{ nombre: string; apellido: string; email: string; rol: string } | null>(null)
+  const [cartOpen, setCartOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -85,40 +87,48 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Link>
               
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                      <Avatar className="h-9 w-9">
-                        <AvatarFallback>{`${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.nombre} {user.apellido}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {user.rol === 'admin' && (
-                      <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard Admin</span>
+                <div className="flex items-center gap-4">
+                  {/* Carrito */}
+                  <button onClick={() => setCartOpen(true)} className="relative">
+                    <ShoppingCart className="h-7 w-7 text-blue-600 hover:text-blue-800" />
+                  </button>
+                  {/* Avatar de usuario */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                        <Avatar className="h-9 w-9">
+                          <img src="/placeholder-user.jpg" alt="avatar" className="h-9 w-9 rounded-full object-cover" />
+                          <AvatarFallback>{`${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user.nombre} {user.apellido}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {user.rol === 'admin' && (
+                        <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Dashboard Admin</span>
+                        </DropdownMenuItem>
+                      )}
+                      {user.rol === 'cliente' && (
+                        <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Panel de Cliente</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={logout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Cerrar Sesión</span>
                       </DropdownMenuItem>
-                    )}
-                    {user.rol === 'cliente' && (
-                      <DropdownMenuItem onClick={() => router.push('/cliente/dashboard')}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Panel de Cliente</span>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               ) : (
                 <>
                   <Link href="/login">
@@ -195,6 +205,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
         )}
       </nav>
+
+      {/* CartSidebar global */}
+      <CartSidebar open={cartOpen} setOpen={setCartOpen} />
 
       {/* Main Content */}
       <main className="flex-grow pt-16">
