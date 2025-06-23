@@ -32,6 +32,18 @@ interface Product {
   imageUrl: string;
 }
 
+// Función para crear un slug a partir del nombre del producto
+function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/--+/g, '-');
+}
+
 export default function ProductsPage() {
   const [filters, setFilters] = useState({
     search: '',
@@ -225,7 +237,7 @@ export default function ProductsPage() {
                     <CardContent className="p-4">
                       <CardTitle className="text-xl font-bold mb-2 truncate">{product.name}</CardTitle>
                       <p className="text-blue-600 text-lg font-semibold mb-4">${product.price}</p>
-                      <Link href={`/producto/${product.id}`}>
+                      <Link href={`/producto/${slugify(product.name)}/${product.codigo}`}>
                         <Button className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300">
                           Ver Detalles <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>

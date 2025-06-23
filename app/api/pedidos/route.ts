@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 import { getOrders, createOrder, getUserByEmail, getProducts, getUsers } from "@/lib/data-store"
+import { prisma } from '@/lib/prisma'
+import { v4 as uuidv4 } from 'uuid'
 
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get("authorization")
@@ -16,6 +18,19 @@ function verifyToken(request: NextRequest) {
   }
 
   return jwt.verify(token, process.env.JWT_SECRET || "fallback-secret-key") as any
+}
+
+function getErrorMessage(error: unknown): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as Record<string, unknown>).message === "string"
+  ) {
+    const err = error as { message: string };
+    return err.message;
+  }
+  return "Error desconocido";
 }
 
 export async function GET(request: NextRequest) {
@@ -41,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     // Enriquecer con datos del cliente
     const pedidosEnriquecidos = pedidos.map((pedido) => {
-      const usuario = usuarios.find((u) => u.id === pedido.usuario_id)
+      const usuario = usuarios.find((u) => u.id === pedido.usuarioId)
       return {
         ...pedido,
         cliente_nombre: usuario ? `${usuario.nombre} ${usuario.apellido}` : "Cliente Desconocido",
@@ -55,66 +70,51 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error obteniendo pedidos:", error)
     return NextResponse.json(
       {
         error: "Error interno del servidor",
-        debug: error instanceof Error ? error.message : "Error desconocido",
+        debug: getErrorMessage(error),
       },
       { status: 500, headers: { "Content-Type": "application/json" } },
     )
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const decoded = verifyToken(request)
-    const body = await request.text()
-    const { items } = JSON.parse(body)
-
-    // Calcular total y enriquecer items con descripción del producto
-    const productos = await getProducts()
-    let total = 0
-    const itemsEnriquecidos = items.map((item: any) => {
-      const producto = productos.find((p) => p.id === item.producto_id)
-      const subtotal = item.cantidad * item.precio_unitario
-      total += subtotal
-
-      return {
-        producto_id: item.producto_id,
-        producto_descripcion: producto?.descripcion || "Producto desconocido",
-        cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
-      }
-    })
-
-    // Obtener datos del usuario
-    const usuario = await getUserByEmail(decoded.email)
-
-    const newPedido = await createOrder({
-      usuario_id: decoded.userId,
-      estado: "pendiente",
+    const data = await req.json()
+    const {
+      userId,
+      cantidad,
+      asientos,
+      fecha,
       total,
-      items: itemsEnriquecidos,
-      cliente_nombre: usuario ? `${usuario.nombre} ${usuario.apellido}` : "Cliente",
-      cliente_email: usuario?.email || decoded.email,
-    })
+      precio,
+      comprobanteNombre
+    } = data
 
-    console.log("Pedido creado:", newPedido.numero_pedido)
-
-    return NextResponse.json(newPedido, {
-      status: 201,
-      headers: { "Content-Type": "application/json" },
-    })
-  } catch (error) {
-    console.error("Error creando pedido:", error)
-    return NextResponse.json(
-      {
-        error: "Error interno del servidor",
-        debug: error instanceof Error ? error.message : "Error desconocido",
+    const pedido = await prisma.pedido.create({
+      data: {
+        numero_pedido: uuidv4(),
+        cliente_nombre: data.cliente_nombre || '',
+        cliente_email: data.cliente_email || '',
+        fecha_pedido: new Date(),
+        estado: 'pendiente',
+        total,
+        detalles: {
+          cantidad,
+          asientos,
+          fecha,
+          precio,
+          comprobanteNombre
+        },
+        usuarioId: userId,
       },
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    )
+    })
+    return NextResponse.json({ success: true, pedido })
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error?.message || 'Error al crear pedido' }, { status: 500 })
   }
 }
