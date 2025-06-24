@@ -27,6 +27,11 @@ model Usuario {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   pedidos       Pedido[]
+  
+  // Verificación de email
+  emailVerificado        Boolean   @default(false)
+  tokenVerificacion      String?
+  tokenVerificacionExpira DateTime?
 }
 
 model Producto {

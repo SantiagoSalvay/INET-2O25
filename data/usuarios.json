@@ -10,7 +10,10 @@
       "rol": "empleado",
       "departamento": "contabilidad",
       "fecha_ingreso": "2025-06-16T01:07:11.480Z",
-      "activo": true
+      "activo": true,
+      "emailVerificado": true,
+      "tokenVerificacion": null,
+      "tokenVerificacionExpira": null
     }
   ]
 }

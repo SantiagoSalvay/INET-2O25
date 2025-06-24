@@ -108,7 +108,7 @@ export default function RegisterPage() {
 
       if (response.ok && data.success) {
         console.log("Registration successful!")
-        setSuccessMessage(data.message || "Registro exitoso")
+        setSuccessMessage("Registro exitoso. Por favor revisa tu email para activar tu cuenta.")
 
         // Limpiar formulario
         setFormData({
@@ -120,10 +120,10 @@ export default function RegisterPage() {
           confirmPassword: "",
         })
 
-        // Redirigir al login después de un delay
-        setTimeout(() => {
-          router.push("/login?message=Registro exitoso. Puedes iniciar sesión.")
-        }, 2000)
+        // No redirigir automáticamente
+        // setTimeout(() => {
+        //   router.push("/login?message=Registro exitoso. Puedes iniciar sesión.")
+        // }, 2000)
       } else {
         setError(data.error || "Error al registrarse")
         if (data.details) {
@@ -258,10 +258,14 @@ export default function RegisterPage() {
               </div>
 
               {successMessage && (
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription className="text-green-600">{successMessage}</AlertDescription>
-                </Alert>
+                <div className="flex flex-col items-center gap-2 p-5 my-2 rounded-xl border-2 border-blue-500 bg-blue-50 animate-fade-in">
+                  <svg width="48" height="48" viewBox="0 0 64 64" fill="none" className="mb-1">
+                    <circle cx="32" cy="32" r="32" fill="#2563eb"/>
+                    <path d="M20 34L29 43L44 26" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="text-lg font-semibold text-blue-700 text-center">{successMessage}</span>
+                  <span className="text-sm text-gray-600 text-center animate-pulse">Revisa tu bandeja de entrada y spam para encontrar el email de activación.</span>
+                </div>
               )}
 
               {error && (

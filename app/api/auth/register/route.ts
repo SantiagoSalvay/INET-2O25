@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
+import { sendVerificationEmail } from '@/lib/send-email'
+import crypto from 'crypto'
 
 // Función para crear respuesta JSON segura
 function createJsonResponse(data: any, status = 200) {
@@ -116,6 +118,10 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, saltRounds)
     console.log("Password hashed with bcrypt successfully")
 
+    // Generar token de verificación y expiración (1 día)
+    const tokenVerificacion = crypto.randomBytes(32).toString('hex')
+    const tokenVerificacionExpira = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
     // Crear usuario en la base de datos
     const newUser = await prisma.usuario.create({
       data: {
@@ -130,19 +136,30 @@ export async function POST(request: NextRequest) {
         activo: true,
         createdAt: new Date(),
         updatedAt: new Date(),
+        emailVerificado: false,
+        tokenVerificacion,
+        tokenVerificacionExpira,
       },
     })
 
-    // Remover password del objeto de respuesta
-    const { password: _, ...userWithoutPassword } = newUser
+    // Enviar email de verificación
+    const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verificar-email?token=${tokenVerificacion}`
+    await sendVerificationEmail({
+      to: newUser.email,
+      nombre: newUser.nombre,
+      verificationUrl
+    })
+
+    // Remover password y token del objeto de respuesta
+    const { password: _, tokenVerificacion: __, tokenVerificacionExpira: ___, ...userWithoutSensitive } = newUser
 
     console.log("Registration successful for:", email)
 
     return createJsonResponse(
       {
         success: true,
-        message: "Usuario registrado exitosamente",
-        user: userWithoutPassword,
+        message: "Usuario registrado exitosamente. Por favor verifica tu email para activar la cuenta.",
+        user: userWithoutSensitive,
         timestamp: new Date().toISOString(),
       },
       201,

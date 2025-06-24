@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 import { updateOrderStatus } from "@/lib/data-store"
+import { sendOrderStatusEmail } from '@/lib/send-email'
+import { prisma } from '@/lib/prisma'
 
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get("authorization")
@@ -29,6 +31,18 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const pedidoId = Number.parseInt(params.id)
 
     await updateOrderStatus(pedidoId, estado)
+
+    // Obtener el pedido actualizado y usuario
+    const pedido = await prisma.pedido.findUnique({ where: { id: pedidoId } })
+    const usuario = pedido ? await prisma.usuario.findUnique({ where: { id: pedido.usuarioId } }) : null
+    if (pedido && usuario) {
+      await sendOrderStatusEmail({
+        to: usuario.email,
+        nombre: usuario.nombre,
+        estado,
+        pedido
+      })
+    }
 
     return NextResponse.json(
       { message: "Pedido actualizado exitosamente" },
