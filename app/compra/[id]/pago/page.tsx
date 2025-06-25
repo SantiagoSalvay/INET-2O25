@@ -6,21 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
-  CheckCircle2,
   ArrowLeft,
-  Clock,
   Calendar,
   Users,
-  FileText,
   Mail,
-  User
+  User,
+  UploadCloud
 } from "lucide-react"
 
-export default function CompraPage({ params }: { params: { id: string } }) {
+export default function PagoCompraPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [pedido, setPedido] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadMsg, setUploadMsg] = useState("")
+  const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchPedido() {
@@ -43,6 +46,25 @@ export default function CompraPage({ params }: { params: { id: string } }) {
     fetchPedido()
   }, [params.id])
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] || null
+    setFile(f)
+    setPreview(f ? URL.createObjectURL(f) : null)
+    setUploadMsg("")
+  }
+
+  async function handleUpload() {
+    if (!file) return
+    setUploading(true)
+    setUploadMsg("")
+    // Simulación de upload
+    setTimeout(() => {
+      setUploading(false)
+      setUploadMsg("Comprobante subido correctamente. Será verificado por un administrador.")
+      setComprobanteUrl(preview)
+    }, 1500)
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-blue-700 font-bold text-xl">Cargando compra...</div>
   }
@@ -51,6 +73,19 @@ export default function CompraPage({ params }: { params: { id: string } }) {
   }
 
   const detalles = pedido.detalles || {}
+
+  // Utilidades para mostrar datos aunque estén en pedido o detalles
+  const getDato = (campo: string) => {
+    if (detalles && typeof detalles[campo] !== 'undefined' && detalles[campo] !== null && detalles[campo] !== '') return detalles[campo]
+    if (pedido && typeof pedido[campo] !== 'undefined' && pedido[campo] !== null && pedido[campo] !== '') return pedido[campo]
+    return '-'
+  }
+  const getFecha = (campo: string) => {
+    const val = getDato(campo)
+    if (val && val !== '-') return new Date(val).toLocaleDateString()
+    return '-'
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Botón Volver */}
@@ -58,26 +93,17 @@ export default function CompraPage({ params }: { params: { id: string } }) {
         <Button
           variant="ghost"
           className="flex items-center space-x-2"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => window.history.back()}
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Volver al Dashboard</span>
+          <span>Volver atrás</span>
         </Button>
       </div>
 
       {/* Detalles de la Compra */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-3xl mx-auto">
-          {/* Encabezado */}
-          <div className="text-center mb-8">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              ¡Compra Realizada con Éxito!
-            </h1>
-            <p className="text-gray-600">
-              Tu compra ha sido procesada correctamente. A continuación encontrarás los detalles.
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold text-blue-700 mb-6 text-center">Pago de tu compra</h1>
 
           {/* Información de la Compra */}
           <Card className="mb-8">
@@ -87,7 +113,7 @@ export default function CompraPage({ params }: { params: { id: string } }) {
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
                     {detalles.producto || pedido.cliente_nombre}
                   </h2>
-                  <p className="text-gray-600">ID de Compra: {pedido.id}</p>
+                  <p className="text-gray-600">Token de Compra: <span className="font-mono text-xs">{pedido.numero_pedido}</span></p>
                   <p className="text-gray-600 flex items-center"><Mail className="h-4 w-4 mr-1" /> {pedido.cliente_email}</p>
                 </div>
                 <Badge
@@ -110,16 +136,20 @@ export default function CompraPage({ params }: { params: { id: string } }) {
                     <span>Fecha de Compra: {new Date(pedido.fecha_pedido).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <Clock className="h-5 w-5 mr-2" />
-                    <span>Fecha de Viaje: {detalles.fecha ? new Date(detalles.fecha).toLocaleDateString() : '-'}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
                     <Users className="h-5 w-5 mr-2" />
-                    <span>Personas: {detalles.cantidad || '-'}</span>
+                    <span>Personas: {
+                      detalles.cantidad || pedido.cantidad || pedido.personas || '-'
+                    }</span>
                   </div>
                   <div className="flex items-center text-gray-600">
                     <User className="h-5 w-5 mr-2" />
-                    <span>Asientos: {Array.isArray(detalles.asientos) ? detalles.asientos.join(', ') : '-'}</span>
+                    <span>Asientos: {
+                      Array.isArray(detalles.asientos) && detalles.asientos.length > 0
+                        ? detalles.asientos.join(', ')
+                        : Array.isArray(pedido.asientos) && pedido.asientos.length > 0
+                          ? pedido.asientos.join(', ')
+                          : '-'
+                    }</span>
                   </div>
                 </div>
 
@@ -132,7 +162,7 @@ export default function CompraPage({ params }: { params: { id: string } }) {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Cantidad de personas:</span>
-                      <span>{detalles.cantidad || '-'}</span>
+                      <span>{detalles.cantidad || pedido.cantidad || pedido.personas || '-'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Producto:</span>
@@ -157,39 +187,37 @@ export default function CompraPage({ params }: { params: { id: string } }) {
             </CardContent>
           </Card>
 
-          {/* Comprobante de Pago */}
-          <Card>
+          {/* Información de Pago */}
+          <Card className="mb-8">
             <CardContent className="p-6">
-              <div className="flex items-center mb-4">
-                <FileText className="h-5 w-5 mr-2 text-gray-600" />
-                <h3 className="text-lg font-semibold">Comprobante de Pago</h3>
-              </div>
-              <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
-                {/* Aquí podrías mostrar el comprobante real si existe */}
-                <img
-                  src={pedido.comprobante || "/placeholder.svg?height=200&width=300"}
-                  alt="Comprobante de pago"
-                  className="w-full h-full object-contain"
-                />
+              <h3 className="font-semibold mb-2 text-lg text-blue-700">Datos para realizar el pago</h3>
+              <div className="space-y-2 text-gray-700 text-sm">
+                <div><b>CBU:</b> 0000003100098765432100</div>
+                <div><b>Alias:</b> TURISMO.PAGOS.BANCO</div>
+                <div><b>Banco:</b> Banco de Ejemplo S.A.</div>
+                <div><b>Titular:</b> Turismo Web S.A.</div>
+                <div className="text-xs text-gray-500 mt-2">Recuerda adjuntar el comprobante de pago para que podamos verificar tu compra.</div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Acciones */}
-          <div className="mt-8 flex justify-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => router.push("/dashboard")}
-            >
-              Volver al Dashboard
-            </Button>
-            <Button
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => window.print()}
-            >
-              Descargar Comprobante
-            </Button>
-          </div>
+          {/* Subir Comprobante */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-2 text-lg text-blue-700 flex items-center"><UploadCloud className="h-5 w-5 mr-2" /> Subir comprobante de pago</h3>
+              <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} className="mb-4" />
+              {preview && (
+                <div className="mb-4">
+                  <div className="text-xs text-gray-500 mb-1">Vista previa:</div>
+                  <img src={preview} alt="Comprobante" className="max-h-48 rounded shadow border" />
+                </div>
+              )}
+              <Button onClick={handleUpload} disabled={!file || uploading} className="bg-blue-600 hover:bg-blue-700">
+                {uploading ? "Subiendo..." : "Enviar comprobante"}
+              </Button>
+              {uploadMsg && <div className="text-green-700 font-semibold mt-3">{uploadMsg}</div>}
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

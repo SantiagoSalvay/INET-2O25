@@ -14,6 +14,25 @@ function verifyToken(request: NextRequest) {
   return jwt.verify(token, process.env.JWT_SECRET || "fallback-secret-key") as any
 }
 
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    let pedido = null;
+    if (/^[0-9]+$/.test(params.id)) {
+      // Buscar por id numérico
+      pedido = await prisma.pedido.findUnique({ where: { id: Number(params.id) } })
+    } else {
+      // Buscar por numero_pedido (UUID)
+      pedido = await prisma.pedido.findUnique({ where: { numero_pedido: params.id } })
+    }
+    if (!pedido) {
+      return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 })
+    }
+    return NextResponse.json(pedido)
+  } catch (error) {
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const decoded = verifyToken(request)
