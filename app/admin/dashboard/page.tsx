@@ -304,9 +304,14 @@ export default function AdminDashboard() {
       }
 
       if (pedidosRes.ok) {
-        const pedidosData = await pedidosRes.json()
-        console.log("Orders loaded:", pedidosData.length)
-        setPedidos(pedidosData)
+        let pedidosData = await pedidosRes.json();
+        // Normalizar para que todos los pedidos tengan 'items' como array
+        pedidosData = pedidosData.map((pedido: any) => ({
+          ...pedido,
+          items: pedido.items ?? [],
+        }));
+        console.log("Orders loaded:", pedidosData.length);
+        setPedidos(pedidosData);
       } else {
         console.error("Error loading orders:", pedidosRes.status)
       }
@@ -1325,8 +1330,7 @@ export default function AdminDashboard() {
                           <div className="space-y-1">
                             {pedido.items.map((item, index) => (
                               <div key={index} className="text-sm text-gray-600">
-                                {item.cantidad}x {item.producto_descripcion} - ${item.precio_unitario.toLocaleString()}{" "}
-                                c/u
+                                {item.cantidad}x {item.producto_descripcion} - ${item.precio_unitario.toLocaleString()} c/u
                               </div>
                             ))}
                           </div>
