@@ -54,15 +54,32 @@ export default function PagoCompraPage({ params }: { params: { id: string } }) {
   }
 
   async function handleUpload() {
-    if (!file) return
-    setUploading(true)
-    setUploadMsg("")
-    // Simulación de upload
-    setTimeout(() => {
-      setUploading(false)
-      setUploadMsg("Comprobante subido correctamente. Será verificado por un administrador.")
-      setComprobanteUrl(preview)
-    }, 1500)
+    if (!file) return;
+    setUploading(true);
+    setUploadMsg("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/pedidos/${params.id}/comprobante`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok && data.comprobanteUrl) {
+        setUploadMsg("Comprobante subido correctamente. Será verificado por un administrador.");
+        setComprobanteUrl(data.comprobanteUrl);
+        // Refrescar el pedido para que el admin lo vea actualizado
+        const pedidoRes = await fetch(`/api/pedidos/${params.id}`);
+        const pedidoData = await pedidoRes.json();
+        setPedido(pedidoData);
+      } else {
+        setUploadMsg(data.error || "Error al subir el comprobante");
+      }
+    } catch (err) {
+      setUploadMsg("Error al subir el comprobante. Intenta nuevamente.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   if (loading) {
@@ -206,10 +223,38 @@ export default function PagoCompraPage({ params }: { params: { id: string } }) {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2 text-lg text-blue-700 flex items-center"><UploadCloud className="h-5 w-5 mr-2" /> Subir comprobante de pago</h3>
               <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} className="mb-4" />
-              {preview && (
+              {preview && !comprobanteUrl && (
                 <div className="mb-4">
-                  <div className="text-xs text-gray-500 mb-1">Vista previa:</div>
+                  <div className="text-xs text-gray-500 mb-1">Vista previa local:</div>
                   <img src={preview} alt="Comprobante" className="max-h-48 rounded shadow border" />
+                </div>
+              )}
+              {comprobanteUrl && (
+                <div className="mb-4">
+                  <div className="text-xs text-gray-500 mb-1">Comprobante subido:</div>
+                  {comprobanteUrl.match(/\.(pdf)$/i) ? (
+                    <>
+                      <iframe
+                        src={(comprobanteUrl.startsWith('http') ? comprobanteUrl : `${window.location.origin}${comprobanteUrl}`) + `?t=${Date.now()}`}
+                        title="Comprobante PDF"
+                        className="w-full max-w-md h-64 border rounded mb-2"
+                      />
+                      <a
+                        href={comprobanteUrl.startsWith('http') ? comprobanteUrl : `${window.location.origin}${comprobanteUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline text-sm"
+                      >
+                        Descargar PDF
+                      </a>
+                    </>
+                  ) : (
+                    <img
+                      src={(comprobanteUrl.startsWith('http') ? comprobanteUrl : `${window.location.origin}${comprobanteUrl}`) + `?t=${Date.now()}`}
+                      alt="Comprobante subido"
+                      className="max-h-48 rounded shadow border"
+                    />
+                  )}
                 </div>
               )}
               <Button onClick={handleUpload} disabled={!file || uploading} className="bg-blue-600 hover:bg-blue-700">

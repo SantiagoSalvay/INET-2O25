@@ -39,6 +39,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 interface User {
   id: number
@@ -1367,64 +1368,68 @@ export default function AdminDashboard() {
               </Card>
 
               {/* Modal de detalles del pedido */}
-              {viewingOrder && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Detalles del Pedido #{viewingOrder.numero_pedido}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="font-medium mb-2">Información del Cliente</h4>
-                          <p className="text-sm">Nombre: {viewingOrder.cliente_nombre}</p>
-                          <p className="text-sm">Email: {viewingOrder.cliente_email}</p>
+              {viewingOrder && (() => {
+                const detalles = (viewingOrder as any).detalles || {};
+                return (
+                  <Dialog open={!!viewingOrder} onOpenChange={() => setViewingOrder(null)}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Detalles del Pedido #{viewingOrder.numero_pedido}</DialogTitle>
+                        <DialogDescription>Información completa de la compra y comprobante</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <h4 className="font-medium mb-2">Información del Cliente</h4>
+                            <p className="text-sm">Nombre: {viewingOrder.cliente_nombre}</p>
+                            <p className="text-sm">Email: {viewingOrder.cliente_email}</p>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-2">Información del Pedido</h4>
+                            <p className="text-sm">Fecha: {new Date(viewingOrder.fecha_pedido).toLocaleDateString()}</p>
+                            <p className="text-sm">Estado: {viewingOrder.estado}</p>
+                            <p className="text-sm font-bold">Total: ${viewingOrder.total.toLocaleString()}</p>
+                          </div>
                         </div>
                         <div>
-                          <h4 className="font-medium mb-2">Información del Pedido</h4>
-                          <p className="text-sm">Fecha: {new Date(viewingOrder.fecha_pedido).toLocaleDateString()}</p>
-                          <p className="text-sm">Estado: {viewingOrder.estado}</p>
-                          <p className="text-sm font-bold">Total: ${viewingOrder.total.toLocaleString()}</p>
+                          <h4 className="font-medium mb-2">Información de la Compra</h4>
+                          <ul className="text-sm text-gray-700 space-y-1">
+                            <li><b>Cantidad de personas:</b> {detalles.cantidad ?? '-'}</li>
+                            <li><b>Asientos:</b> {Array.isArray(detalles.asientos) ? detalles.asientos.join(', ') : '-'}</li>
+                            <li><b>Fecha de viaje:</b> {detalles.fecha ? new Date(detalles.fecha).toLocaleDateString() : '-'}</li>
+                            <li><b>Precio por persona:</b> {detalles.precio ? `$${detalles.precio.toLocaleString()}` : '-'}</li>
+                            <li><b>Producto:</b> {detalles.producto ?? '-'}</li>
+                            <li><b>Categoría:</b> {detalles.categoria ?? '-'}</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-2">Comprobante de Pago</h4>
+                          {detalles.comprobanteNombre ? (
+                            <div className="flex flex-col items-center">
+                              <span className="text-sm text-gray-700 mb-2">{detalles.comprobanteNombre}</span>
+                              {detalles.comprobanteUrl ? (
+                                <>
+                                  <img src={detalles.comprobanteUrl} alt="Comprobante" className="max-h-64 rounded shadow mb-2" />
+                                  <a href={detalles.comprobanteUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm">Ver/Descargar comprobante</a>
+                                </>
+                              ) : (
+                                <span className="text-xs text-gray-400">(No hay archivo disponible para previsualizar)</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-500">No se subió comprobante.</span>
+                          )}
+                        </div>
+                        <div className="flex justify-end">
+                          <Button variant="outline" onClick={() => setViewingOrder(null)}>
+                            Cerrar
+                          </Button>
                         </div>
                       </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">Items del Pedido</h4>
-                        <div className="border rounded-lg overflow-hidden">
-                          <table className="w-full">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-4 py-2 text-left text-sm font-medium">Producto</th>
-                                <th className="px-4 py-2 text-left text-sm font-medium">Cantidad</th>
-                                <th className="px-4 py-2 text-left text-sm font-medium">Precio Unitario</th>
-                                <th className="px-4 py-2 text-left text-sm font-medium">Subtotal</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {viewingOrder.items.map((item, index) => (
-                                <tr key={index} className="border-t">
-                                  <td className="px-4 py-2 text-sm">{item.producto_descripcion}</td>
-                                  <td className="px-4 py-2 text-sm">{item.cantidad}</td>
-                                  <td className="px-4 py-2 text-sm">${item.precio_unitario.toLocaleString()}</td>
-                                  <td className="px-4 py-2 text-sm font-medium">
-                                    ${(item.cantidad * item.precio_unitario).toLocaleString()}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end">
-                        <Button variant="outline" onClick={() => setViewingOrder(null)}>
-                          Cerrar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </DialogContent>
+                  </Dialog>
+                );
+              })()}
             </div>
           </TabsContent>
 
