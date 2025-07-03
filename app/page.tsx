@@ -317,18 +317,11 @@ export default function HomePage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                       <Avatar className="h-9 w-9">
+                        <img src="/placeholder-user.jpg" alt="avatar" className="h-9 w-9 rounded-full object-cover" />
                         <AvatarFallback>
-                          {user ? (
-                            user.rol === 'admin'
-                              ? 'ADMIN'
-                              : user.rol === 'cliente'
-                                ? 'CLIENTE'
-                                : user.nombre && user.apellido
-                                  ? `${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`
-                                  : '?'
-                          ) : (
-                            '?'
-                          )}
+                          {user.nombre && user.apellido
+                            ? `${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`
+                            : "?"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -438,10 +431,17 @@ export default function HomePage() {
               </Link>
               {user ? (
                 <div className="px-3 py-2 space-y-2">
-                  <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>{user.nombre}</span>
-                  </Button>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Avatar className="h-9 w-9">
+                      <img src="/placeholder-user.jpg" alt="avatar" className="h-9 w-9 rounded-full object-cover" />
+                      <AvatarFallback>
+                        {user.nombre && user.apellido
+                          ? `${user.nombre.charAt(0).toUpperCase()}${user.apellido.charAt(0).toUpperCase()}`
+                          : "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold text-gray-800">{user.nombre}</span>
+                  </div>
                   {user.rol === 'admin' && (
                     <Link href="/admin/dashboard" className="block w-full">
                       <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300">
